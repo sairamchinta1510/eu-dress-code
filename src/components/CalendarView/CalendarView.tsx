@@ -38,7 +38,14 @@ const CalendarView: React.FC<Props> = ({ events, loading, error, onRefresh }) =>
             key={event.id}
             className={`${styles.item}${dc ? ` ${styles.itemClickable}` : ''}`}
             onClick={() => dc && navigate(`/dress-codes/${dc.id}`)}
+            onKeyDown={(e) => {
+              if (dc && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                navigate(`/dress-codes/${dc.id}`);
+              }
+            }}
             role={dc ? 'button' : undefined}
+            tabIndex={dc ? 0 : undefined}
             aria-label={dc ? `${event.subject} — ${dc.name} required. Tap for details.` : undefined}
           >
             <div className={styles.eventHeader}>

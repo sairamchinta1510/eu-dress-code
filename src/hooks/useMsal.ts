@@ -45,7 +45,9 @@ export const useMsal = () => {
   }, [instance]);
 
   const signOut = useCallback(() => {
-    instance.logoutPopup();
+    instance.logoutPopup().catch((e: unknown) => {
+      setError(e instanceof Error ? e.message : 'Sign out failed');
+    });
   }, [instance]);
 
   const fetchEvents = useCallback(async () => {
