@@ -8,7 +8,7 @@ test('renders all three navigation tabs', () => {
       <BottomNav />
     </MemoryRouter>
   );
-  expect(screen.getByText(/Dress Codes/i)).toBeInTheDocument();
+  expect(screen.getByText(/Home/i)).toBeInTheDocument();
   expect(screen.getByText(/Calendar/i)).toBeInTheDocument();
   expect(screen.getByText(/Closet/i)).toBeInTheDocument();
 });

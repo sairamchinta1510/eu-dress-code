@@ -27,6 +27,7 @@
 .tab:global(.active) {
   color: var(--navy);
   font-weight: 600;
+  border-top: 2px solid var(--navy);
 }
 
 .icon {
