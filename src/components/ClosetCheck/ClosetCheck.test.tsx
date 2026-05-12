@@ -12,6 +12,7 @@ beforeEach(() => {
     }),
   }) as jest.Mock;
   global.URL.createObjectURL = jest.fn(() => 'blob:fake-url');
+  global.URL.revokeObjectURL = jest.fn();
   global.FileReader = jest.fn().mockImplementation(() => ({
     readAsDataURL: jest.fn(function(this: any) {
       this.onload({ target: { result: 'data:image/jpeg;base64,fake' } });
