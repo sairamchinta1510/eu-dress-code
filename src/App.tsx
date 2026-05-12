@@ -1,26 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { MsalProvider } from '@azure/msal-react';
+import { msalInstance } from './msalConfig';
+import BottomNav from './components/BottomNav/BottomNav';
+import HomePage from './pages/HomePage';
+import DressCodePage from './pages/DressCodePage';
+import CalendarPage from './pages/CalendarPage';
+import ClosetPage from './pages/ClosetPage';
+import styles from './App.module.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App: React.FC = () => (
+  <MsalProvider instance={msalInstance}>
+    <BrowserRouter>
+      <div className={styles.app}>
+        <main className={styles.main}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/dress-codes/:id" element={<DressCodePage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/closet" element={<ClosetPage />} />
+          </Routes>
+        </main>
+        <BottomNav />
+      </div>
+    </BrowserRouter>
+  </MsalProvider>
+);
 
 export default App;
