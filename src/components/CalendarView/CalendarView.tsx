@@ -59,6 +59,15 @@ const CalendarView: React.FC<Props> = ({ events, loading, error, onRefresh }) =>
                 <span className={styles.badgeUnknown}>No code</span>
               )}
             </div>
+            {dc && (
+              <button
+                className={styles.closetBtn}
+                onClick={(e) => { e.stopPropagation(); navigate(`/closet?dressCodeId=${dc.id}`); }}
+                aria-label={`Check my closet for ${dc.name}`}
+              >
+                🪞 Check my closet for {dc.name}
+              </button>
+            )}
             {event.bodyPreview && (
               <p className={styles.preview}>{event.bodyPreview.slice(0, 80)}…</p>
             )}

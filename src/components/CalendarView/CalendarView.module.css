@@ -76,6 +76,25 @@
   line-height: 1.4;
 }
 
+.closetBtn {
+  margin-top: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--navy);
+  font-weight: 600;
+  width: 100%;
+  text-align: left;
+  display: block;
+}
+
+.closetBtn:hover {
+  background: var(--border);
+}
+
 .state {
   padding: 40px 16px;
   text-align: center;
