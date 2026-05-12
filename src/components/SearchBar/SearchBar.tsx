@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dressCodes } from '../../data/dressCodes';
 import { useSearch } from '../../hooks/useSearch';
@@ -13,6 +13,30 @@ const SearchBar: React.FC<Props> = ({ query, onChange }) => {
   const results = useSearch(dressCodes, query);
   const navigate = useNavigate();
   const showDropdown = query.trim().length > 0;
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const selectResult = useCallback((id: string) => {
+    onChange('');
+    setActiveIndex(-1);
+    navigate(`/dress-codes/${id}`);
+  }, [onChange, navigate]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, results.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, -1));
+    } else if (e.key === 'Enter' && activeIndex >= 0 && results[activeIndex]) {
+      e.preventDefault();
+      selectResult(results[activeIndex].id);
+    } else if (e.key === 'Escape') {
+      onChange('');
+      setActiveIndex(-1);
+    }
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -23,25 +47,32 @@ const SearchBar: React.FC<Props> = ({ query, onChange }) => {
           type="search"
           placeholder="Search dress codes, occasions, shoe colour…"
           value={query}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => { onChange(e.target.value); setActiveIndex(-1); }}
+          onKeyDown={handleKeyDown}
           aria-label="Search dress codes"
+          aria-expanded={showDropdown}
+          aria-controls="search-results"
+          aria-autocomplete="list"
+          role="combobox"
+          aria-activedescendant={activeIndex >= 0 ? `result-${activeIndex}` : undefined}
         />
         {query && (
-          <button className={styles.clear} onClick={() => onChange('')} aria-label="Clear search">✕</button>
+          <button className={styles.clear} onClick={() => { onChange(''); setActiveIndex(-1); }} aria-label="Clear search">✕</button>
         )}
       </div>
       {showDropdown && (
-        <ul className={styles.dropdown} role="listbox">
+        <ul id="search-results" className={styles.dropdown} role="listbox" aria-label="Search results">
           {results.length === 0 && (
-            <li className={styles.noResults}>No dress codes found</li>
+            <li className={styles.noResults} role="option" aria-selected={false}>No dress codes found</li>
           )}
-          {results.map((d) => (
+          {results.map((d, i) => (
             <li
               key={d.id}
-              className={styles.result}
+              id={`result-${i}`}
+              className={`${styles.result}${i === activeIndex ? ` ${styles.resultActive}` : ''}`}
               role="option"
-              aria-selected={false}
-              onClick={() => { onChange(''); navigate(`/dress-codes/${d.id}`); }}
+              aria-selected={i === activeIndex}
+              onClick={() => selectResult(d.id)}
             >
               <span className={styles.resultIcon}>{d.icon}</span>
               <div>
