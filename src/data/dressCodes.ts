@@ -1,32 +1,36 @@
 import { DressCode } from '../types';
 
-// Photos: Unsplash source URLs (development). Replace with curated Unsplash API
-// photo IDs for production. Format: https://images.unsplash.com/photo-{ID}?w=400&h=600&fit=crop
+// Photos: loremflickr.com — real Flickr photos filtered by keyword, deterministic via ?lock=N
+const F = (keywords: string, lock: number) =>
+  `https://loremflickr.com/400/600/${keywords}?lock=${lock}`;
 const PHOTO = {
-  whiteTieMen: 'https://source.unsplash.com/400x600/?tailcoat,white-tie,man,formal',
-  whiteTieWomen: 'https://source.unsplash.com/400x600/?ballgown,white-tie,gown,woman',
-  blackTieMen: 'https://source.unsplash.com/400x600/?tuxedo,black-tie,man',
-  blackTieWomen: 'https://source.unsplash.com/400x600/?evening-gown,black-tie,woman',
-  blackTieOptMen: 'https://source.unsplash.com/400x600/?suit,formal,man',
-  blackTieOptWomen: 'https://source.unsplash.com/400x600/?cocktail-dress,formal,woman',
-  morningMen: 'https://source.unsplash.com/400x600/?morning-dress,tailcoat,man',
-  morningWomen: 'https://source.unsplash.com/400x600/?day-dress,hat,elegant,woman',
-  creativeMen: 'https://source.unsplash.com/400x600/?velvet-jacket,creative,fashion,man',
-  creativeWomen: 'https://source.unsplash.com/400x600/?statement-dress,fashion,woman',
-  cocktailMen: 'https://source.unsplash.com/400x600/?dark-suit,cocktail,man',
-  cocktailWomen: 'https://source.unsplash.com/400x600/?cocktail-dress,woman',
-  loungeMen: 'https://source.unsplash.com/400x600/?lounge-suit,business,man',
-  loungeWomen: 'https://source.unsplash.com/400x600/?trouser-suit,smart,woman',
-  bizFormalMen: 'https://source.unsplash.com/400x600/?business-formal,suit,tie,man',
-  bizFormalWomen: 'https://source.unsplash.com/400x600/?business-formal,blazer,woman',
-  bizCasualMen: 'https://source.unsplash.com/400x600/?business-casual,chinos,man',
-  bizCasualWomen: 'https://source.unsplash.com/400x600/?business-casual,blouse,woman',
-  smartCasualMen: 'https://source.unsplash.com/400x600/?smart-casual,blazer,jeans,man',
-  smartCasualWomen: 'https://source.unsplash.com/400x600/?smart-casual,woman',
-  resortMen: 'https://source.unsplash.com/400x600/?linen,resort,man',
-  resortWomen: 'https://source.unsplash.com/400x600/?sundress,resort,woman',
-  casualMen: 'https://source.unsplash.com/400x600/?casual,jeans,man',
-  casualWomen: 'https://source.unsplash.com/400x600/?casual,woman',
+  // Men — formal to casual
+  whiteTieMen:    F('tailcoat,white-tie,tuxedo,man,formal', 11),
+  blackTieMen:    F('tuxedo,black-tie,man,formal', 22),
+  blackTieOptMen: F('suit,formal,man,tie', 33),
+  morningMen:     F('morning,coat,formal,man', 44),
+  creativeMen:    F('fashion,suit,creative,man,stylish', 55),
+  cocktailMen:    F('cocktail,suit,man,smart', 66),
+  loungeMen:      F('lounge,suit,man,business', 77),
+  bizFormalMen:   F('business,formal,suit,tie,man', 88),
+  bizCasualMen:   F('business,casual,man,chinos', 99),
+  smartCasualMen: F('smart,casual,blazer,man,jeans', 110),
+  resortMen:      F('linen,resort,casual,man,beach', 121),
+  casualMen:      F('casual,jeans,man,street,fashion', 132),
+
+  // Women — formal to casual
+  whiteTieWomen:    F('ballgown,white-tie,gown,woman,formal', 143),
+  blackTieWomen:    F('evening,gown,black-tie,woman,formal', 154),
+  blackTieOptWomen: F('elegant,dress,formal,woman,fashion', 165),
+  morningWomen:     F('day,dress,hat,elegant,woman', 176),
+  creativeWomen:    F('fashion,dress,creative,woman,stylish', 187),
+  cocktailWomen:    F('cocktail,dress,woman,party', 198),
+  loungeWomen:      F('trouser,suit,woman,professional,business', 209),
+  bizFormalWomen:   F('business,formal,blazer,woman,suit', 220),
+  bizCasualWomen:   F('business,casual,woman,blouse,office', 231),
+  smartCasualWomen: F('smart,casual,woman,outfit,fashion', 242),
+  resortWomen:      F('sundress,resort,woman,summer,beach', 253),
+  casualWomen:      F('casual,woman,fashion,street,outfit', 264),
 };
 
 export const dressCodes: DressCode[] = [
