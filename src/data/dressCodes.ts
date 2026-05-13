@@ -1,36 +1,37 @@
 import { DressCode } from '../types';
 
-// Photos: loremflickr.com — real Flickr photos filtered by keyword, deterministic via ?lock=N
-const F = (keywords: string, lock: number) =>
-  `https://loremflickr.com/400/600/${keywords}?lock=${lock}`;
+// Photos: Verified Pexels photo IDs (CDN, no API key required)
+// Format: https://images.pexels.com/photos/{ID}/pexels-photo-{ID}.jpeg
+const P = (id: number) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop`;
 const PHOTO = {
-  // Men — formal to casual
-  whiteTieMen:    F('tailcoat,white-tie,tuxedo,man,formal', 11),
-  blackTieMen:    F('tuxedo,black-tie,man,formal', 22),
-  blackTieOptMen: F('suit,formal,man,tie', 33),
-  morningMen:     F('morning,coat,formal,man', 44),
-  creativeMen:    F('fashion,suit,creative,man,stylish', 55),
-  cocktailMen:    F('cocktail,suit,man,smart', 66),
-  loungeMen:      F('lounge,suit,man,business', 77),
-  bizFormalMen:   F('business,formal,suit,tie,man', 88),
-  bizCasualMen:   F('business,casual,man,chinos', 99),
-  smartCasualMen: F('smart,casual,blazer,man,jeans', 110),
-  resortMen:      F('linen,resort,casual,man,beach', 121),
-  casualMen:      F('casual,jeans,man,street,fashion', 132),
+  // Men — formal to casual (verified Pexels IDs)
+  whiteTieMen:    P(35073009), // Elegant man in white tuxedo for formal event
+  blackTieMen:    P(29133444), // Portrait of man in formal black tuxedo
+  blackTieOptMen: P(27691958), // Man in tuxedo adjusting bow tie
+  morningMen:     P(28513055), // Professional portrait of confident man in suit
+  creativeMen:    P(29995914), // Elegant portrait of man in black velvet tuxedo
+  cocktailMen:    P(3777557),  // Man in black suit jacket standing and smiling
+  loungeMen:      P(2897883),  // Man wearing blue lounge suit
+  bizFormalMen:   P(14011217), // Man wearing suit and tie standing in the office
+  bizCasualMen:   P(1043474),  // Man in white dress shirt holding suit jacket
+  smartCasualMen: P(14391921), // Man wearing a blazer, standing confidently
+  resortMen:      P(28865421), // Man in tropical shirt standing outside
+  casualMen:      P(17858291), // Man in jeans and t-shirt
 
-  // Women — formal to casual
-  whiteTieWomen:    F('ballgown,white-tie,gown,woman,formal', 143),
-  blackTieWomen:    F('evening,gown,black-tie,woman,formal', 154),
-  blackTieOptWomen: F('elegant,dress,formal,woman,fashion', 165),
-  morningWomen:     F('day,dress,hat,elegant,woman', 176),
-  creativeWomen:    F('fashion,dress,creative,woman,stylish', 187),
-  cocktailWomen:    F('cocktail,dress,woman,party', 198),
-  loungeWomen:      F('trouser,suit,woman,professional,business', 209),
-  bizFormalWomen:   F('business,formal,blazer,woman,suit', 220),
-  bizCasualWomen:   F('business,casual,woman,blouse,office', 231),
-  smartCasualWomen: F('smart,casual,woman,outfit,fashion', 242),
-  resortWomen:      F('sundress,resort,woman,summer,beach', 253),
-  casualWomen:      F('casual,woman,fashion,street,outfit', 264),
+  // Women — formal to casual (verified Pexels IDs)
+  whiteTieWomen:    P(30715591), // Elegant woman in formal ball gown
+  blackTieWomen:    P(16894090), // Woman standing in glamorous black evening dress
+  blackTieOptWomen: P(1755428),  // Woman in red formal dress on staircase
+  morningWomen:     P(32794217), // Elegant woman in vintage hat and dress
+  creativeWomen:    P(34791585), // Stylish woman with bold fashion statement
+  cocktailWomen:    P(15797138), // Woman in cocktail evening dress
+  loungeWomen:      P(5900416),  // Woman in black blazer and pants on street
+  bizFormalWomen:   P(7581113),  // Woman wearing a blazer in the office
+  bizCasualWomen:   P(2887766),  // Woman in black double-button jacket
+  smartCasualWomen: P(36128756), // Casual street style fashion portrait
+  resortWomen:      P(14749667), // Woman in sundress standing on sea shore
+  casualWomen:      P(22223042), // Woman in jeans, casual fashion
 };
 
 export const dressCodes: DressCode[] = [
