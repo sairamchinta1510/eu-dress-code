@@ -1,27 +1,43 @@
 .page {
   min-height: 100vh;
   padding-bottom: var(--nav-height);
+  background: var(--bg);
 }
 
 .header {
-  background: var(--navy);
-  color: #fff;
-  padding: 24px 16px 20px;
+  background: linear-gradient(160deg, #161b22 0%, #0d1117 100%);
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.accentBar {
+  width: 4px;
+  min-height: 36px;
+  background: linear-gradient(180deg, #ff6b6b, #ffa500);
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .title {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.3px;
-  margin: 0 0 4px;
+  margin: 0 0 3px;
   color: #fff;
 }
 
 .subtitle {
-  font-size: 14px;
-  opacity: 0.75;
-  margin: 0 0 16px;
-  color: #fff;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
 }
 
 .searchWrapper {
@@ -29,8 +45,17 @@
 }
 
 .grid {
-  padding: 16px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2px;
 }
