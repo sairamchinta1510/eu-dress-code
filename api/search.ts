@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 Return ONLY valid JSON: an array of { "id": string, "relevance": number (1-5), "reason": string (one sentence) }.
 Only include dress codes with relevance >= 2. Sort by descending relevance.
 
-User query: "${query}"
+User query: """${query}"""
 
 Dress codes:
 ${JSON.stringify(dressCodes, null, 2)}`;
@@ -63,6 +63,9 @@ ${JSON.stringify(dressCodes, null, 2)}`;
     }
 
     const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1)) as SearchResultItem[];
+    if (!Array.isArray(parsed) || parsed.some((item) => !item.id || typeof item.relevance !== 'number' || typeof item.reason !== 'string')) {
+      throw new Error('Invalid response format from Gemini');
+    }
     return res.status(200).json({ results: parsed });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Search failed';
