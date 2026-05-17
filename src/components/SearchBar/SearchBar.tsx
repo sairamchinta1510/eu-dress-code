@@ -1,53 +1,63 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dressCodes } from '../../data/dressCodes';
-import { useSearch } from '../../hooks/useSearch';
+import { useLLMSearch } from '../../hooks/useLLMSearch';
 import styles from './SearchBar.module.css';
 
-interface Props {
-  query: string;
-  onChange: (q: string) => void;
-}
-
-const SearchBar: React.FC<Props> = ({ query, onChange }) => {
-  const results = useSearch(dressCodes, query);
+const SearchBar: React.FC = () => {
+  const { results, loading, error, search } = useLLMSearch(dressCodes);
   const navigate = useNavigate();
-  const showDropdown = query.trim().length > 0;
+  const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
+  const showDropdown = query.trim().length > 0;
 
   const selectResult = useCallback((id: string) => {
-    onChange('');
+    setQuery('');
     setActiveIndex(-1);
+    search('');
     navigate(`/dress-codes/${id}`);
-  }, [onChange, navigate]);
+  }, [navigate, search]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showDropdown) return;
-    if (e.key === 'ArrowDown') {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIndex >= 0 && results[activeIndex]) {
+        selectResult(results[activeIndex].dressCode.id);
+      } else {
+        search(query);
+      }
+    } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActiveIndex((i) => Math.min(i + 1, results.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, -1));
-    } else if (e.key === 'Enter' && activeIndex >= 0 && results[activeIndex]) {
-      e.preventDefault();
-      selectResult(results[activeIndex].id);
     } else if (e.key === 'Escape') {
-      onChange('');
+      setQuery('');
       setActiveIndex(-1);
+      search('');
     }
   };
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.inputRow}>
-        <span className={styles.searchIcon}>🔍</span>
+        {loading ? (
+          <span className={styles.spinner} role="status" aria-label="Searching…">⏳</span>
+        ) : (
+          <button
+            className={styles.searchIcon}
+            onClick={() => search(query)}
+            aria-label="Search"
+            tabIndex={-1}
+          >🔍</button>
+        )}
         <input
           className={styles.input}
           type="search"
-          placeholder="Search dress codes, occasions, shoe colour…"
+          placeholder="Ask anything — e.g. something for a rainy outdoor lunch"
           value={query}
-          onChange={(e) => { onChange(e.target.value); setActiveIndex(-1); }}
+          onChange={(e) => { setQuery(e.target.value); setActiveIndex(-1); }}
           onKeyDown={handleKeyDown}
           aria-label="Search dress codes"
           aria-expanded={showDropdown}
@@ -57,15 +67,22 @@ const SearchBar: React.FC<Props> = ({ query, onChange }) => {
           aria-activedescendant={activeIndex >= 0 ? `result-${activeIndex}` : undefined}
         />
         {query && (
-          <button className={styles.clear} onClick={() => { onChange(''); setActiveIndex(-1); }} aria-label="Clear search">✕</button>
+          <button
+            className={styles.clear}
+            onClick={() => { setQuery(''); setActiveIndex(-1); search(''); }}
+            aria-label="Clear search"
+          >✕</button>
         )}
       </div>
       {showDropdown && (
         <ul id="search-results" className={styles.dropdown} role="listbox" aria-label="Search results">
-          {results.length === 0 && (
+          {error && (
+            <li className={styles.errorMsg} role="option" aria-selected={false}>{error}</li>
+          )}
+          {!error && results.length === 0 && !loading && (
             <li className={styles.noResults} role="option" aria-selected={false}>No dress codes found</li>
           )}
-          {results.map((d, i) => (
+          {!error && results.map(({ dressCode: d, reason }, i) => (
             <li
               key={d.id}
               id={`result-${i}`}
@@ -77,7 +94,11 @@ const SearchBar: React.FC<Props> = ({ query, onChange }) => {
               <span className={styles.resultIcon}>{d.icon}</span>
               <div>
                 <div className={styles.resultName}>{d.name}</div>
-                <div className={styles.resultSub}>{d.formalityLabel}</div>
+                {reason ? (
+                  <div className={styles.reason}>{reason}</div>
+                ) : (
+                  <div className={styles.resultSub}>{d.formalityLabel}</div>
+                )}
               </div>
             </li>
           ))}

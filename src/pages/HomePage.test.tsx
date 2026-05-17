@@ -15,7 +15,7 @@ test('renders all 12 dress code cards', () => {
 
 test('search bar is present', () => {
   render(<MemoryRouter><HomePage /></MemoryRouter>);
-  const input = screen.getByPlaceholderText(/Search dress codes/i);
+  const input = screen.getByRole('combobox');
   fireEvent.change(input, { target: { value: 'white tie' } });
   expect(input).toHaveValue('white tie');
 });

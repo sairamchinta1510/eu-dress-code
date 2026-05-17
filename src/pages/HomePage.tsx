@@ -1,28 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import SearchBar from '../components/SearchBar/SearchBar';
 import DressCodeCard from '../components/DressCodeCard/DressCodeCard';
 import { dressCodes } from '../data/dressCodes';
 import styles from './HomePage.module.css';
 
-const HomePage: React.FC = () => {
-  const [query, setQuery] = useState('');
-
-  return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>EU Dress Code Guide</h1>
-        <p className={styles.subtitle}>Know exactly what to wear, every time</p>
-        <div className={styles.searchWrapper}>
-          <SearchBar query={query} onChange={setQuery} />
-        </div>
-      </header>
-      <section className={styles.grid} aria-label="Dress codes">
-        {dressCodes.map((dc) => (
-          <DressCodeCard key={dc.id} dressCode={dc} />
-        ))}
-      </section>
-    </div>
-  );
-};
+const HomePage: React.FC = () => (
+  <div className={styles.page}>
+    <header className={styles.header}>
+      <h1 className={styles.title}>EU Dress Code Guide</h1>
+      <p className={styles.subtitle}>Know exactly what to wear, every time</p>
+      <div className={styles.searchWrapper}>
+        <SearchBar />
+      </div>
+    </header>
+    <section className={styles.grid} aria-label="Dress codes">
+      {dressCodes.map((dc) => (
+        <DressCodeCard key={dc.id} dressCode={dc} />
+      ))}
+    </section>
+  </div>
+);
 
 export default HomePage;
