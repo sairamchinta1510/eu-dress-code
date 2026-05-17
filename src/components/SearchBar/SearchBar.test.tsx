@@ -58,6 +58,14 @@ describe('SearchBar', () => {
     });
   });
 
+  it('calls search on search button click', () => {
+    render(<MemoryRouter><SearchBar /></MemoryRouter>);
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'gala dinner' } });
+    fireEvent.click(screen.getByRole('button', { name: /^search$/i }));
+    expect(mockSearch).toHaveBeenCalledWith('gala dinner');
+  });
+
   it('shows error message in dropdown when search fails', async () => {
     jest.spyOn(useLLMSearchModule, 'useLLMSearch').mockReturnValue(mockHookError);
     render(<MemoryRouter><SearchBar /></MemoryRouter>);

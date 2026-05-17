@@ -18,7 +18,7 @@ const SearchBar: React.FC = () => {
     navigate(`/dress-codes/${id}`);
   }, [navigate, search]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (activeIndex >= 0 && results[activeIndex]) {
@@ -37,7 +37,7 @@ const SearchBar: React.FC = () => {
       setActiveIndex(-1);
       search('');
     }
-  };
+  }, [query, results, search, activeIndex, selectResult]);
 
   return (
     <div className={styles.wrapper}>
@@ -49,7 +49,6 @@ const SearchBar: React.FC = () => {
             className={styles.searchIcon}
             onClick={() => search(query)}
             aria-label="Search"
-            tabIndex={-1}
           >🔍</button>
         )}
         <input
@@ -76,13 +75,16 @@ const SearchBar: React.FC = () => {
       </div>
       {showDropdown && (
         <ul id="search-results" className={styles.dropdown} role="listbox" aria-label="Search results">
+          {loading && (
+            <li className={styles.noResults} role="option" aria-selected={false}>Searching…</li>
+          )}
           {error && (
             <li className={styles.errorMsg} role="option" aria-selected={false}>{error}</li>
           )}
           {!error && results.length === 0 && !loading && (
             <li className={styles.noResults} role="option" aria-selected={false}>No dress codes found</li>
           )}
-          {!error && results.map(({ dressCode: d, reason }, i) => (
+          {!error && !loading && results.map(({ dressCode: d, reason }, i) => (
             <li
               key={d.id}
               id={`result-${i}`}
