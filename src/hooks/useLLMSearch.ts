@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { DressCode } from '../types';
 
 export interface SearchResult {
@@ -14,6 +14,7 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
   const [results, setResults] = useState<SearchResult[]>(() => allAsResults(dressCodes));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const search = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -21,6 +22,13 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
       setError(null);
       return;
     }
+
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setLoading(true);
     setError(null);
@@ -34,6 +42,7 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, dressCodes: summaries }),
+        signal: controller.signal,
       });
 
       const data = await res.json() as { results?: { id: string; relevance: number; reason: string }[]; error?: string };
@@ -51,10 +60,16 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
 
       setResults(mapped);
     } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return; // Stale request cancelled — do not update state
+      }
       setError(err instanceof Error ? err.message : 'Search failed');
       setResults([]);
     } finally {
-      setLoading(false);
+      // Only clear loading if this is still the current request
+      if (abortControllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   }, [dressCodes]);
 

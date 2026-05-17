@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dressCodes } from '../../data/dressCodes';
 import { useLLMSearch } from '../../hooks/useLLMSearch';
@@ -10,6 +10,10 @@ const SearchBar: React.FC = () => {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const showDropdown = query.trim().length > 0;
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [results]);
 
   const selectResult = useCallback((id: string) => {
     setQuery('');

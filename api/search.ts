@@ -35,6 +35,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'dressCodes array is required' });
   }
 
+  const invalidItem = dressCodes.find(
+    (dc) => !dc.id || !dc.name || !dc.description || !Array.isArray(dc.occasions) || !Array.isArray(dc.keywords)
+  );
+  if (invalidItem) {
+    return res.status(400).json({ error: 'Each dress code must have id, name, description, occasions, and keywords' });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
@@ -44,11 +51,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+    const safeQuery = query.replace(/"""/g, "'''");
     const prompt = `You are a dress code assistant. Given the user's query, rank the following dress codes by relevance.
 Return ONLY valid JSON: an array of { "id": string, "relevance": number (1-5), "reason": string (one sentence) }.
 Only include dress codes with relevance >= 2. Sort by descending relevance.
 
-User query: """${query}"""
+User query: """${safeQuery}"""
 
 Dress codes:
 ${JSON.stringify(dressCodes, null, 2)}`;
