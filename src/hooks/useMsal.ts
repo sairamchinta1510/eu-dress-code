@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useMsal as useMsalLib } from '@azure/msal-react';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
 import { loginRequest } from '../msalConfig';
 import { CalendarEvent } from '../types';
 
@@ -56,7 +57,16 @@ export const useMsal = () => {
     setError(null);
     try {
       const account = accounts[0];
-      const token = await instance.acquireTokenSilent({ ...loginRequest, account });
+      let token;
+      try {
+        token = await instance.acquireTokenSilent({ ...loginRequest, account });
+      } catch (e) {
+        if (e instanceof InteractionRequiredAuthError) {
+          token = await instance.acquireTokenPopup({ ...loginRequest, account });
+        } else {
+          throw e;
+        }
+      }
       const now = new Date();
       const end = new Date(now);
       end.setDate(end.getDate() + 7);

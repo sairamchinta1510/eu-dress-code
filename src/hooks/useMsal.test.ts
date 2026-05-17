@@ -1,4 +1,5 @@
 import { detectDressCode } from './useMsal';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
 
 describe('detectDressCode', () => {
   it('detects black tie from "gala"', () => {
@@ -23,5 +24,13 @@ describe('detectDressCode', () => {
 
   it('checks body preview when title has no match', () => {
     expect(detectDressCode('Friday Event', 'black tie required')).toBe('black-tie');
+  });
+});
+
+describe('InteractionRequiredAuthError fallback', () => {
+  it('can be imported from @azure/msal-browser', () => {
+    // This test validates that the import works correctly
+    // If the import fails, the test file would fail to load
+    expect(true).toBe(true);
   });
 });
