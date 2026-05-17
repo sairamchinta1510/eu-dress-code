@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLLMSearch } from './useLLMSearch';
 import { dressCodes } from '../data/dressCodes';
 
@@ -21,26 +21,30 @@ describe('useLLMSearch', () => {
   });
 
   it('sets loading true while fetching and false on completion', async () => {
-    global.fetch = jest.fn().mockImplementation(
-      () => new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            ok: true,
-            json: async () => ({ results: mockResults }),
-          });
-        }, 100);
-      }),
-    ) as jest.Mock;
+    let resolveFetch!: (value: unknown) => void;
+    const fetchPromise = new Promise((resolve) => { resolveFetch = resolve; });
+
+    global.fetch = jest.fn().mockReturnValue(fetchPromise) as jest.Mock;
 
     const { result } = renderHook(() => useLLMSearch(dressCodes));
 
-    await act(async () => {
-      const promise = result.current.search('gala dinner');
-      // Check loading is true or becomes true during the fetch
-      expect([true, false]).toContain(result.current.loading);
-      await promise;
+    // Start search but don't await — check loading mid-flight
+    let searchPromise: Promise<void>;
+    act(() => {
+      searchPromise = result.current.search('gala dinner');
     });
 
+    await waitFor(() => expect(result.current.loading).toBe(true));
+
+    // Resolve the fetch
+    act(() => {
+      resolveFetch({
+        ok: true,
+        json: async () => ({ results: mockResults }),
+      });
+    });
+
+    await act(async () => { await searchPromise; });
     expect(result.current.loading).toBe(false);
   });
 
@@ -79,6 +83,20 @@ describe('useLLMSearch', () => {
     expect(result.current.results).toHaveLength(0);
   });
 
+  it('sets error when fetch throws (network failure)', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error')) as jest.Mock;
+
+    const { result } = renderHook(() => useLLMSearch(dressCodes));
+
+    await act(async () => {
+      await result.current.search('gala');
+    });
+
+    expect(result.current.error).toBe('Network error');
+    expect(result.current.results).toHaveLength(0);
+    expect(result.current.loading).toBe(false);
+  });
+
   it('resets to all dress codes when search is called with empty string', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
@@ -96,5 +114,32 @@ describe('useLLMSearch', () => {
       result.current.search('');
     });
     expect(result.current.results).toHaveLength(12);
+  });
+
+  it('sends only summary fields to the API (not full DressCode objects)', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [] }),
+    }) as jest.Mock;
+
+    const { result } = renderHook(() => useLLMSearch(dressCodes));
+
+    await act(async () => {
+      await result.current.search('test query');
+    });
+
+    const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+    const body = JSON.parse(fetchCall[1].body);
+    
+    expect(body.query).toBe('test query');
+    expect(body.dressCodes).toHaveLength(12);
+    // Summary only — should NOT contain men/women/formality/icon fields
+    expect(body.dressCodes[0]).toHaveProperty('id');
+    expect(body.dressCodes[0]).toHaveProperty('name');
+    expect(body.dressCodes[0]).toHaveProperty('description');
+    expect(body.dressCodes[0]).toHaveProperty('occasions');
+    expect(body.dressCodes[0]).toHaveProperty('keywords');
+    expect(body.dressCodes[0]).not.toHaveProperty('men');
+    expect(body.dressCodes[0]).not.toHaveProperty('women');
   });
 });
