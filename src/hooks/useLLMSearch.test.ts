@@ -142,4 +142,23 @@ describe('useLLMSearch', () => {
     expect(body.dressCodes[0]).not.toHaveProperty('men');
     expect(body.dressCodes[0]).not.toHaveProperty('women');
   });
+
+  it('uses REACT_APP_API_URL env var as fetch base URL', async () => {
+    process.env.REACT_APP_API_URL = 'https://eu-dress-code.vercel.app';
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: mockResults }),
+    }) as jest.Mock;
+
+    const { result } = renderHook(() => useLLMSearch(dressCodes));
+
+    await act(async () => {
+      await result.current.search('gala dinner');
+    });
+
+    const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+    expect(fetchCall[0]).toBe('https://eu-dress-code.vercel.app/api/search');
+
+    delete process.env.REACT_APP_API_URL;
+  });
 });
