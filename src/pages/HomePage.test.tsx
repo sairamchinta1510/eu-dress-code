@@ -10,7 +10,7 @@ test('renders page title', () => {
 test('renders all 12 dress code cards', () => {
   render(<MemoryRouter><HomePage /></MemoryRouter>);
   expect(screen.getByText('White Tie')).toBeInTheDocument();
-  expect(screen.getByText('Casual')).toBeInTheDocument();
+  expect(screen.getAllByText('Casual').length).toBeGreaterThan(0);
 });
 
 test('search bar is present', () => {
