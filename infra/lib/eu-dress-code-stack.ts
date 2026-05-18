@@ -16,8 +16,6 @@ import * as path from 'path';
 const DOMAIN_NAME = 'eudresscode.tadpoleindustries.com';
 const HOSTED_ZONE_ID = 'Z0650233B5QZHL1QIP47';
 const HOSTED_ZONE_NAME = 'tadpoleindustries.com';
-const SSM_PARAM_ARN = 'arn:aws:ssm:us-east-1:913111977146:parameter/eu-dress-code/GEMINI_API_KEY';
-
 export class EuDressCodeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -43,16 +41,18 @@ export class EuDressCodeStack extends cdk.Stack {
     });
 
     // ── Lambda: shared IAM policy for SSM ────────────────────────────────────
+    const ssmParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter/eu-dress-code/GEMINI_API_KEY`;
+    // NOTE: Assumes the SSM parameter uses the default aws/ssm managed key.
+    // If a CMK is used, also add kms:Decrypt on the key ARN.
     const ssmReadPolicy = new iam.PolicyStatement({
       actions: ['ssm:GetParameter'],
-      resources: [SSM_PARAM_ARN],
+      resources: [ssmParamArn],
     });
 
     const lambdaDefaults: Partial<lambdaNodejs.NodejsFunctionProps> = {
       runtime: lambda.Runtime.NODEJS_20_X,
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(28),
       memorySize: 256,
-      bundling: { externalModules: [] },
       // entry paths are outside infra/, so set projectRoot to repo root
       projectRoot: path.join(__dirname, '../..'),
     };
@@ -98,8 +98,8 @@ export class EuDressCodeStack extends cdk.Stack {
       integration: new apigwv2Integrations.HttpLambdaIntegration('SearchIntegration', searchFn),
     });
 
-    // API Gateway domain: {apiId}.execute-api.us-east-1.amazonaws.com
-    const apiGatewayDomain = `${httpApi.httpApiId}.execute-api.us-east-1.amazonaws.com`;
+    // API Gateway domain: {apiId}.execute-api.{region}.amazonaws.com
+    const apiGatewayDomain = `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`;
 
     // ── CloudFront ────────────────────────────────────────────────────────────
     const oac = new cloudfront.S3OriginAccessControl(this, 'OAC');
@@ -170,6 +170,10 @@ export class EuDressCodeStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, 'SiteUrl', {
       value: `https://${DOMAIN_NAME}`,
+    });
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: httpApi.apiEndpoint,
+      description: 'HTTP API endpoint for Lambda functions',
     });
   }
 }
