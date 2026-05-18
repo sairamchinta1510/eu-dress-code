@@ -13,11 +13,12 @@ export async function getGeminiApiKey(): Promise<string> {
       new GetParameterCommand({ Name: paramName, WithDecryption: true })
     );
     const value = result.Parameter?.Value;
-    if (!value) throw new Error('API key parameter exists but has no value');
+    if (!value) throw new Error('SSM parameter exists but has no value');
     cachedApiKey = value;
     return cachedApiKey;
-  } catch {
-    throw new Error('Failed to retrieve API key from configuration');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to retrieve API key from SSM: ${msg}`);
   }
 }
 

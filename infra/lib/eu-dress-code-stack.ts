@@ -16,11 +16,13 @@ import * as path from 'path';
 const DOMAIN_NAME = 'eudresscode.tadpoleindustries.com';
 const HOSTED_ZONE_ID = 'Z0650233B5QZHL1QIP47';
 const HOSTED_ZONE_NAME = 'tadpoleindustries.com';
+const GEMINI_SSM_PARAM_NAME = '/eu-dress-code/GEMINI_API_KEY';
 export class EuDressCodeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // CloudFront requires ACM certificates to be in us-east-1 — enforce at synth time.
+    // this.region is concrete because app.ts always passes env.region explicitly.
     if (this.region !== 'us-east-1') {
       throw new Error(
         `EuDressCodeStack must be deployed to us-east-1 (CloudFront ACM constraint). Got: ${this.region}`
@@ -48,7 +50,7 @@ export class EuDressCodeStack extends cdk.Stack {
     });
 
     // ── Lambda: shared IAM policy for SSM ────────────────────────────────────
-    const ssmParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter/eu-dress-code/GEMINI_API_KEY`;
+    const ssmParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${GEMINI_SSM_PARAM_NAME}`;
     // NOTE: Assumes the SSM parameter uses the default aws/ssm managed key.
     // If a CMK is used, also add kms:Decrypt on the key ARN.
     const ssmReadPolicy = new iam.PolicyStatement({
@@ -63,7 +65,7 @@ export class EuDressCodeStack extends cdk.Stack {
       // entry paths are outside infra/, so set projectRoot to repo root
       projectRoot: path.join(__dirname, '../..'),
       environment: {
-        GEMINI_SSM_PARAM: '/eu-dress-code/GEMINI_API_KEY',
+        GEMINI_SSM_PARAM: GEMINI_SSM_PARAM_NAME,
       },
     };
 
