@@ -54,7 +54,6 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
   try {
     const apiKey = await getGeminiApiKey();
-    if (!apiKey) return respond(500, { error: 'GEMINI_API_KEY not configured' });
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });

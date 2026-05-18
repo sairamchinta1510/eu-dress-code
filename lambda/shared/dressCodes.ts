@@ -32,7 +32,7 @@ export const DRESS_CODE_ITEMS: Record<string, string[]> = {
     'Waistcoat in dove grey or buff',
     'Striped morning trousers',
     'Cravat or formal necktie',
-    'Top hat (optional)',
+    'Top hat',
     'Black Oxford shoe',
   ],
   'creative-black-tie': [
