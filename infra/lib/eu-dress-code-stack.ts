@@ -20,6 +20,13 @@ export class EuDressCodeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // CloudFront requires ACM certificates to be in us-east-1 — enforce at synth time.
+    if (this.region !== 'us-east-1') {
+      throw new Error(
+        `EuDressCodeStack must be deployed to us-east-1 (CloudFront ACM constraint). Got: ${this.region}`
+      );
+    }
+
     // ── Route 53 ────────────────────────────────────────────────────────────
     const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
       hostedZoneId: HOSTED_ZONE_ID,
