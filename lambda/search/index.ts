@@ -1,18 +1,6 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
-
-const ssmClient = new SSMClient({ region: 'us-east-1' });
-let cachedApiKey: string | null = null;
-
-async function getGeminiApiKey(): Promise<string> {
-  if (cachedApiKey) return cachedApiKey;
-  const result = await ssmClient.send(
-    new GetParameterCommand({ Name: '/eu-dress-code/GEMINI_API_KEY', WithDecryption: true })
-  );
-  cachedApiKey = result.Parameter?.Value ?? '';
-  return cachedApiKey;
-}
+import { getGeminiApiKey, respond } from '../shared/utils';
 
 interface DressCodeSummary {
   id: string;
@@ -33,31 +21,20 @@ export interface SearchResultItem {
   reason: string;
 }
 
-const ALLOWED_ORIGIN = 'https://eudresscode.tadpoleindustries.com';
-
-const respond = (statusCode: number, body: unknown): APIGatewayProxyResultV2 => ({
-  statusCode,
-  headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  },
-  body: JSON.stringify(body),
-});
-
 export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
   const method = event.requestContext.http.method;
-
-  if (method === 'OPTIONS') {
-    return { statusCode: 204, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };
-  }
 
   if (method !== 'POST') {
     return respond(405, { error: 'Method not allowed' });
   }
 
-  const body = JSON.parse(event.body ?? '{}') as SearchRequestBody;
+  let body: SearchRequestBody;
+  try {
+    body = JSON.parse(event.body ?? '{}') as SearchRequestBody;
+  } catch {
+    return respond(400, { error: 'Invalid JSON body' });
+  }
+
   const { query, dressCodes } = body;
 
   if (!query || !query.trim()) {
