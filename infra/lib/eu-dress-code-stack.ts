@@ -55,6 +55,9 @@ export class EuDressCodeStack extends cdk.Stack {
       memorySize: 256,
       // entry paths are outside infra/, so set projectRoot to repo root
       projectRoot: path.join(__dirname, '../..'),
+      environment: {
+        GEMINI_SSM_PARAM: '/eu-dress-code/GEMINI_API_KEY',
+      },
     };
 
     // ── Lambda: analyze-closet ────────────────────────────────────────────────

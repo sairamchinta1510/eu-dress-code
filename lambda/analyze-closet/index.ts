@@ -1,14 +1,7 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { dressCodes } from '../../src/data/dressCodes';
+import { DRESS_CODE_ITEMS } from '../shared/dressCodes';
 import { getGeminiApiKey, respond } from '../shared/utils';
-
-const DRESS_CODE_ITEMS: Record<string, string[]> = Object.fromEntries(
-  dressCodes.map((dc) => [
-    dc.id,
-    [dc.men.jacket, dc.men.top, dc.men.bottom, ...dc.men.accessories, `${dc.men.shoeColour} ${dc.men.shoeType}`],
-  ])
-);
 
 export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
   const method = event.requestContext.http.method;
