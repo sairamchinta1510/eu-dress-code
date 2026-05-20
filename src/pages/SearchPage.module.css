@@ -109,19 +109,14 @@
   background: var(--border);
 }
 
-/* ── Matched dress code cards ────────────────────────────── */
-.resultsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
+/* ── Shared detail card (ResultCard + RecommendationCard) ── */
 .resultCard {
   display: flex;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
+  min-height: 460px;
   transition: border-color 0.2s, transform 0.15s;
 }
 .resultCard:hover {
@@ -129,62 +124,256 @@
   transform: translateY(-1px);
 }
 
-.cardPhotoLink {
-  display: block;
+/* Photo panel */
+.cardImagePanel {
+  width: 42%;
   flex-shrink: 0;
-  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  background: #0a0c10;
 }
-
-.cardPhotos {
-  display: flex;
-  width: 130px;
-  flex-shrink: 0;
-}
-.cardPhoto {
-  width: 50%;
+.cardHeroImg {
+  width: 100%;
   height: 100%;
-  min-height: 160px;
   object-fit: cover;
   object-position: center 30%;
   display: block;
 }
-.cardPhoto:first-child { border-right: 1px solid rgba(255,255,255,0.05); }
 
-.cardBody {
-  flex: 1;
-  padding: 14px 16px;
+/* Photo placeholder for AI recommendations with no photo */
+.photoPlaceholder {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+  background: rgba(255,255,255,0.03);
+  border-right: 1px solid var(--border);
+  text-decoration: none;
+  gap: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: background 0.2s;
+}
+.photoPlaceholder:hover { background: rgba(255,255,255,0.06); text-decoration: none; }
+.photoPlaceholderIcon { font-size: 48px; }
+.photoPlaceholderText {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.photoPlaceholderQuery {
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid rgba(232,69,60,0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  line-height: 1.4;
+}
+
+/* Formality overlay at bottom of photo */
+.cardFormalityOverlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(13,17,23,0.9) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cardFormalityLabel {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.55);
+}
+.cardDots { display: flex; gap: 4px; }
+.dotFilled {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); display: inline-block;
+}
+.dotEmpty {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); display: inline-block;
+}
+
+/* Content panel */
+.cardContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 18px 24px;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
-.cardTop {
+.cardTitleRow {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
-.cardIcon { font-size: 24px; flex-shrink: 0; }
-.cardName { font-size: 15px; font-weight: 700; color: var(--text); }
-.cardFormality { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-.cardReason { font-size: 12px; color: var(--text-muted); line-height: 1.45; margin: 0 0 4px; }
-.cardLink { font-size: 12px; font-weight: 700; color: var(--accent); align-self: flex-start; text-decoration: none; margin-bottom: 8px; }
-.cardLink:hover { text-decoration: underline; }
+.cardTitleIcon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+.cardTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 2px;
+  line-height: 1.1;
+}
+.cardFormalityText {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+.cardFullGuideBtn {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 4px 0;
+}
+.cardFullGuideBtn:hover { text-decoration: underline; }
 
-/* Shopping links inside result card */
+/* AI badge */
+.aiBadge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  border: 1px solid rgba(232,69,60,0.35);
+  border-radius: 20px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Description for AI recommendations */
+.recDescText {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+.cardOccasions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.occasionTag {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 11px;
+  padding: 3px 10px;
+  color: var(--text-muted);
+}
+
+/* Tabs */
+.cardTabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 14px;
+}
+.cardTab {
+  flex: 1;
+  padding: 9px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.cardTabActive {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* Outfit breakdown */
+.outfitBreakdownLabel {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin: 0 0 10px;
+}
+.outfitList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+.outfitItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.fieldLabel {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+.fieldValue {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.shoeRow {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 8px 10px !important;
+  border-bottom: none !important;
+  margin-top: 4px;
+}
+.shoeColourValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Outfit text for AI recommendation */
+.recOutfitText {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+
+/* Shopping */
 .cardShops {
   border-top: 1px solid var(--border);
-  padding-top: 10px;
-  margin-top: 4px;
+  padding-top: 12px;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .cardMapsBtn {
   display: block;
   text-align: center;
-  padding: 6px 10px;
+  padding: 7px 10px;
   background: rgba(37,99,235,0.07);
   border: 1px solid rgba(37,99,235,0.22);
   border-radius: 8px;
@@ -196,190 +385,29 @@
 }
 .cardMapsBtn:hover { background: rgba(37,99,235,0.14); text-decoration: none; }
 
-.cardShopGrid { display: flex; flex-direction: column; gap: 5px; }
-.cardShopRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 5px 8px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 7px;
-}
-.cardShopName { font-size: 11px; font-weight: 700; color: var(--text-muted); min-width: 52px; }
-.cardShopLinks { display: flex; gap: 5px; }
-
-/* ── AI Recommendation banner ────────────────────────────── */
-.recBanner {
-  background: var(--surface);
-  border: 1px solid rgba(232,69,60,0.2);
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 4px;
-}
-
-.recBadge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--accent);
-  border: 1px solid rgba(255,107,107,0.3);
-  border-radius: 20px;
-  padding: 4px 12px;
-  margin-bottom: 12px;
-}
-.recName {
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--text);
-  margin: 0 0 4px;
-}
-.recFormality {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
-.recDescription {
-  font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
-.occasions {
-  display: flex;
-  flex-wrap: wrap;
+.cardShopGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 6px;
-  margin-bottom: 12px;
 }
-.occasionTag {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 12px;
-  padding: 3px 10px;
-  color: var(--text-muted);
-}
-
-.recOutfitHint {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-style: italic;
-  line-height: 1.4;
-}
-
-/* ── Outfit columns ──────────────────────────────────────── */
-.outfitSection {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.outfitCol {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.outfitPhoto {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  object-position: center 30%;
-  border-radius: 10px;
-  display: block;
-}
-.photoSearchBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  background: rgba(0,0,0,0.04);
-  border: 1px dashed rgba(0,0,0,0.18);
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-decoration: none;
-  text-align: center;
-  padding: 12px;
-  line-height: 1.4;
-  transition: background 0.15s;
-}
-.photoSearchBtn:hover { background: rgba(0,0,0,0.08); text-decoration: none; }
-
-.outfitLabel {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-.outfitText {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ── Stores ──────────────────────────────────────────────── */
-.storeSection {
-  margin-bottom: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.storeHeader {
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
-  margin: 0 0 10px;
-}
-.mapsBtn {
-  display: block;
-  text-align: center;
-  padding: 10px;
-  background: rgba(37,99,235,0.07);
-  border: 1px solid rgba(37,99,235,0.22);
-  border-radius: 8px;
-  color: #1d4ed8;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s;
-}
-.mapsBtn:hover { background: rgba(37,99,235,0.14); text-decoration: none; }
-
-.onlineGrid { display: flex; flex-direction: column; gap: 8px; }
-.onlineRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: rgba(0,0,0,0.04);
-  border-radius: 8px;
-  gap: 10px;
-}
-.storeName {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  min-width: 60px;
-}
-.storeLinks { display: flex; gap: 8px; }
-.buyBtn {
+.shopStoreBtn {
   font-size: 12px;
   font-weight: 700;
   color: var(--accent);
   border: 1px solid rgba(232,69,60,0.3);
   border-radius: 14px;
-  padding: 4px 12px;
+  padding: 6px 10px;
   text-decoration: none;
+  text-align: center;
   transition: background 0.15s;
+  display: block;
 }
-.buyBtn:hover { background: rgba(232,69,60,0.1); text-decoration: none; }
+.shopStoreBtn:hover { background: rgba(232,69,60,0.1); text-decoration: none; }
 
+/* Mobile */
+@media (max-width: 768px) {
+  .resultCard { flex-direction: column; min-height: unset; }
+  .cardImagePanel { width: 100%; height: 260px; }
+  .photoPlaceholder { min-height: 260px; }
+}
 
