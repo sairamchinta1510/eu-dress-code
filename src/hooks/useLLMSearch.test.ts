@@ -14,7 +14,7 @@ describe('useLLMSearch', () => {
 
   it('returns all dress codes with no reason when query is empty', () => {
     const { result } = renderHook(() => useLLMSearch(dressCodes));
-    expect(result.current.results).toHaveLength(12);
+    expect(result.current.results).toHaveLength(17);
     expect(result.current.results[0].reason).toBe('');
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
@@ -113,7 +113,7 @@ describe('useLLMSearch', () => {
     act(() => {
       result.current.search('');
     });
-    expect(result.current.results).toHaveLength(12);
+    expect(result.current.results).toHaveLength(17);
   });
 
   it('sends only summary fields to the API (not full DressCode objects)', async () => {
@@ -132,7 +132,7 @@ describe('useLLMSearch', () => {
     const body = JSON.parse(fetchCall[1].body);
     
     expect(body.query).toBe('test query');
-    expect(body.dressCodes).toHaveLength(12);
+    expect(body.dressCodes).toHaveLength(17);
     // Summary only — should NOT contain men/women/formality/icon fields
     expect(body.dressCodes[0]).toHaveProperty('id');
     expect(body.dressCodes[0]).toHaveProperty('name');

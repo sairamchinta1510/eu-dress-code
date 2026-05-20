@@ -1,0 +1,322 @@
+.page {
+  min-height: 100vh;
+  padding-bottom: var(--nav-height);
+  background: var(--bg);
+}
+
+/* ── Top search bar ─────────────────────────────────────── */
+.searchHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+}
+
+.backBtn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.backBtn:hover { background: rgba(0,0,0,0.04); }
+
+.inlineBar {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 8px 0 14px;
+}
+
+.inlineInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text);
+  padding: 11px 0;
+}
+.inlineInput::placeholder { color: var(--text-muted); font-size: 13px; }
+
+.goBtn {
+  flex-shrink: 0;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 7px 16px;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: opacity 0.15s;
+}
+.goBtn:hover { opacity: 0.85; }
+
+/* ── Status ─────────────────────────────────────────────── */
+.queryLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 14px 20px 4px;
+}
+.queryLabel strong { color: var(--text); }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.spinner { font-size: 22px; }
+
+.error { padding: 20px; color: var(--danger); font-size: 14px; }
+.noResults { padding: 40px 20px; color: var(--text-muted); text-align: center; }
+
+/* ── Section wrapper ─────────────────────────────────────── */
+.section { padding: 20px 16px 32px; }
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sectionTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Matched dress code cards ────────────────────────────── */
+.resultsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resultCard {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.resultCard:hover {
+  border-color: rgba(255,107,107,0.35);
+  transform: translateY(-1px);
+}
+
+.cardPhotos {
+  display: flex;
+  width: 140px;
+  flex-shrink: 0;
+}
+.cardPhoto {
+  width: 50%;
+  height: 130px;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+}
+.cardPhoto:first-child { border-right: 1px solid rgba(0,0,0,0.06); }
+
+.cardBody {
+  flex: 1;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.cardIcon { font-size: 24px; flex-shrink: 0; }
+.cardName { font-size: 15px; font-weight: 700; color: var(--text); }
+.cardFormality { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.cardReason { font-size: 12px; color: var(--text-muted); line-height: 1.45; margin: 0 0 8px; flex: 1; }
+.cardLink { font-size: 12px; font-weight: 700; color: var(--accent); align-self: flex-start; }
+
+/* ── AI Recommendation ───────────────────────────────────── */
+.recBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid rgba(255,107,107,0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  margin-bottom: 12px;
+}
+.recName {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+.recFormality {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.recDescription {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.occasions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.occasionTag {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  padding: 3px 10px;
+  color: var(--text-muted);
+}
+
+/* ── Outfit columns ──────────────────────────────────────── */
+.outfitSection {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.outfitCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.outfitPhoto {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: center 15%;
+  border-radius: 10px;
+  display: block;
+}
+.photoSearchBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: rgba(0,0,0,0.04);
+  border: 1px dashed rgba(0,0,0,0.18);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  text-align: center;
+  padding: 12px;
+  line-height: 1.4;
+  transition: background 0.15s;
+}
+.photoSearchBtn:hover { background: rgba(0,0,0,0.08); text-decoration: none; }
+
+.outfitLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.outfitText {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Stores ──────────────────────────────────────────────── */
+.storeSection {
+  margin-bottom: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.storeHeader {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+.mapsBtn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: rgba(37,99,235,0.07);
+  border: 1px solid rgba(37,99,235,0.22);
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.mapsBtn:hover { background: rgba(37,99,235,0.14); text-decoration: none; }
+
+.onlineGrid { display: flex; flex-direction: column; gap: 8px; }
+.onlineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 8px;
+  gap: 10px;
+}
+.storeName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 60px;
+}
+.storeLinks { display: flex; gap: 8px; }
+.buyBtn {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid rgba(232,69,60,0.3);
+  border-radius: 14px;
+  padding: 4px 12px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.buyBtn:hover { background: rgba(232,69,60,0.1); text-decoration: none; }
+

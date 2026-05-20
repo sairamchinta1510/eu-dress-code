@@ -1,6 +1,6 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getGeminiApiKey, respond } from '../shared/utils';
+import { getGeminiApiKey, getPexelsApiKey, respond } from '../shared/utils';
 
 interface DressCodeSummary {
   id: string;
@@ -19,6 +19,31 @@ export interface SearchResultItem {
   id: string;
   relevance: number;
   reason: string;
+}
+
+export interface AiRecommendation {
+  name: string;
+  description: string;
+  occasions: string[];
+  formality: 1 | 2 | 3 | 4 | 5;
+  formalityLabel: string;
+  menOutfit: string;
+  womenOutfit: string;
+  menPhoto?: string;
+  womenPhoto?: string;
+}
+
+/** Search Pexels for a portrait-oriented fashion photo; returns URL or null */
+async function pexelsPhoto(query: string, apiKey: string): Promise<string | null> {
+  try {
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=3&orientation=portrait`;
+    const res = await fetch(url, { headers: { Authorization: apiKey } });
+    if (!res.ok) return null;
+    const data = await res.json() as { photos: Array<{ src: { large: string } }> };
+    return data.photos?.[0]?.src?.large ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
@@ -45,41 +70,84 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     return respond(400, { error: 'dressCodes array is required' });
   }
 
-  const invalidItem = dressCodes.find(
-    (dc) => !dc.id || !dc.name || !dc.description || !Array.isArray(dc.occasions) || !Array.isArray(dc.keywords)
-  );
-  if (invalidItem) {
-    return respond(400, { error: 'Each dress code must have id, name, description, occasions, and keywords' });
-  }
-
   try {
-    const apiKey = await getGeminiApiKey();
+    const [apiKey, pexelsKey] = await Promise.all([getGeminiApiKey(), getPexelsApiKey()]);
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const safeQuery = query.replace(/"""/g, "'''");
-    const prompt = `You are a dress code assistant. Given the user's query, rank the following dress codes by relevance.
-Return ONLY valid JSON: an array of { "id": string, "relevance": number (1-5), "reason": string (one sentence) }.
-Only include dress codes with relevance >= 2. Sort by descending relevance.
+    const prompt = `You are a European dress code expert. Given the user query, do two things:
+
+1. From the list below, find dress codes with relevance >= 2 (sorted by descending relevance).
+2. If the query does NOT match any existing dress code (empty results), create a CUSTOM AI recommendation.
 
 User query: """${safeQuery}"""
 
-Dress codes:
-${JSON.stringify(dressCodes, null, 2)}`;
+Known dress codes:
+${JSON.stringify(dressCodes, null, 2)}
+
+Respond ONLY with valid JSON in exactly this format (no markdown):
+{
+  "results": [{ "id": "string", "relevance": number_1_to_5, "reason": "one sentence" }],
+  "recommendation": null
+}
+
+If results is empty, replace null with:
+{
+  "name": "string",
+  "description": "string",
+  "occasions": ["string"],
+  "formality": number_1_to_5,
+  "formalityLabel": "string",
+  "menOutfit": "concise men outfit description",
+  "womenOutfit": "concise women outfit description",
+  "menPhotoSearch": "2-4 word Pexels photo search term for men (e.g. sherwani groom)",
+  "womenPhotoSearch": "2-4 word Pexels photo search term for women (e.g. lehenga bride)"
+}`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
 
-    const jsonStart = text.indexOf('[');
-    const jsonEnd = text.lastIndexOf(']');
-    if (jsonStart === -1 || jsonEnd === -1) throw new Error('Gemini did not return a valid JSON array');
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('Gemini did not return valid JSON');
 
-    const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1)) as SearchResultItem[];
-    if (!Array.isArray(parsed) || parsed.some((item) => !item.id || typeof item.relevance !== 'number' || typeof item.reason !== 'string')) {
+    const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1)) as {
+      results: SearchResultItem[];
+      recommendation: (AiRecommendation & { menPhotoSearch?: string; womenPhotoSearch?: string }) | null;
+    };
+
+    if (!Array.isArray(parsed.results)) {
       throw new Error('Invalid response format from Gemini');
     }
-    return respond(200, { results: parsed });
+
+    // Filter to valid results that reference known dress code IDs
+    const knownIds = new Set(dressCodes.map((d) => d.id));
+    const validResults = parsed.results.filter(
+      (item) => item.id && knownIds.has(item.id) && typeof item.relevance === 'number'
+    );
+
+    let recommendation: AiRecommendation | null = null;
+    if (validResults.length === 0 && parsed.recommendation) {
+      const rec = parsed.recommendation;
+      if (pexelsKey) {
+        const menSearch   = rec.menPhotoSearch   ?? `${rec.name} men fashion`;
+        const womenSearch = rec.womenPhotoSearch ?? `${rec.name} women fashion`;
+        const [menPhoto, womenPhoto] = await Promise.all([
+          pexelsPhoto(menSearch, pexelsKey),
+          pexelsPhoto(womenSearch, pexelsKey),
+        ]);
+        recommendation = { ...rec, menPhoto: menPhoto ?? undefined, womenPhoto: womenPhoto ?? undefined };
+      } else {
+        recommendation = rec;
+      }
+    }
+
+    return respond(200, {
+      results: validResults,
+      recommendation,
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Search failed';
     return respond(500, { error: message });

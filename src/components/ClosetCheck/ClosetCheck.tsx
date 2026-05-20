@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { dressCodes } from '../../data/dressCodes';
 import { ClosetResult } from '../../types';
 import styles from './ClosetCheck.module.css';
@@ -7,12 +8,30 @@ interface Props {
   initialDressCodeId?: string;
 }
 
-const toBase64 = (file: File): Promise<string> =>
+/** Resize image to max 1200px on longest side and re-encode as JPEG at 85% quality.
+ *  Keeps payload well under API Gateway's 10 MB hard limit. */
+const resizeAndEncode = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX = 1200;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width > height) { height = Math.round((height * MAX) / width); width = MAX; }
+        else { width = Math.round((width * MAX) / height); height = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Canvas not supported')); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = reject;
+    img.src = objectUrl;
   });
 
 const ClosetCheck: React.FC<Props> = ({ initialDressCodeId }) => {
@@ -45,7 +64,7 @@ const ClosetCheck: React.FC<Props> = ({ initialDressCodeId }) => {
     setLoading(true);
     setError(null);
     try {
-      const imageBase64 = await toBase64(photo);
+      const imageBase64 = await resizeAndEncode(photo);
       const res = await fetch('/api/analyze-closet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,13 +166,28 @@ const ClosetCheck: React.FC<Props> = ({ initialDressCodeId }) => {
                   <li key={i} className={styles.suggestionItem}>
                     <span>{item}</span>
                     <a
-                      href={`https://www.google.com/search?q=${encodeURIComponent(item + ' buy')}`}
+                      href={`https://www.amazon.com/s?k=${encodeURIComponent(item)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.shopLink}
                     >
-                      Search →
+                      Buy on Amazon →
                     </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {result.suitableFor && result.suitableFor.length > 0 && (
+            <div className={styles.resultSection}>
+              <h3 className={styles.resultTitle}>👗 Your Outfit Suits</h3>
+              <ul className={styles.resultList}>
+                {result.suitableFor.map((dc) => (
+                  <li key={dc.id} className={styles.suitableItem}>
+                    <span>{dc.name}</span>
+                    <Link to={`/dress-codes/${dc.id}`} className={styles.viewLink}>
+                      View Guide →
+                    </Link>
                   </li>
                 ))}
               </ul>

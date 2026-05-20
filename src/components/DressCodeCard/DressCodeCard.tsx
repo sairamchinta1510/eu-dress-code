@@ -13,12 +13,6 @@ function formalityBadge(level: number): { label: string; cls: string } {
   return { label: 'Casual', cls: styles.badgeCasual };
 }
 
-function iconWrapClass(level: number): string {
-  if (level >= 4) return `${styles.iconWrapper} ${styles.iconFormal}`;
-  if (level === 3) return `${styles.iconWrapper} ${styles.iconSemi}`;
-  return `${styles.iconWrapper} ${styles.iconCasual}`;
-}
-
 const formalityDots = (level: number) =>
   Array.from({ length: 5 }, (_, i) => (
     <span key={i} className={i < level ? styles.dotFilled : styles.dotEmpty} aria-hidden="true" />
@@ -28,17 +22,33 @@ const DressCodeCard: React.FC<Props> = ({ dressCode }) => {
   const badge = formalityBadge(dressCode.formality);
   return (
     <Link to={`/dress-codes/${dressCode.id}`} className={styles.card}>
-      <div className={iconWrapClass(dressCode.formality)}>
-        <span className={styles.icon} aria-hidden="true">{dressCode.icon}</span>
+      {/* Split photo thumbnail — men left, women right */}
+      <div className={styles.thumb}>
+        <img
+          src={dressCode.men.photo}
+          alt={`${dressCode.name} men`}
+          className={`${styles.thumbImg} ${styles.thumbLeft}`}
+          loading="lazy"
+        />
+        <img
+          src={dressCode.women.photo}
+          alt={`${dressCode.name} women`}
+          className={`${styles.thumbImg} ${styles.thumbRight}`}
+          loading="lazy"
+        />
       </div>
+
       <div className={styles.body}>
-        <h3 className={styles.name}>{dressCode.name}</h3>
-        <p className={styles.label}>{dressCode.formalityLabel}</p>
+        <div className={styles.nameRow}>
+          <span className={styles.icon} aria-hidden="true">{dressCode.icon}</span>
+          <h3 className={styles.name}>{dressCode.name}</h3>
+        </div>
         <div className={styles.dots} aria-label={`Formality: ${dressCode.formality} out of 5`}>
           {formalityDots(dressCode.formality)}
         </div>
         <p className={styles.occasion}>{dressCode.occasions[0]}</p>
       </div>
+
       <span className={`${styles.badge} ${badge.cls}`}>{badge.label}</span>
     </Link>
   );

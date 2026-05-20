@@ -4,6 +4,7 @@ import DressCodeDetail from './DressCodeDetail';
 import { dressCodes } from '../../data/dressCodes';
 
 const blackTie = dressCodes.find((d) => d.id === 'black-tie')!;
+const whiteTie = dressCodes.find((d) => d.id === 'white-tie')!;
 
 test('renders dress code name', () => {
   render(<MemoryRouter><DressCodeDetail dressCode={blackTie} /></MemoryRouter>);
@@ -19,6 +20,17 @@ test('switches to Women tab on click', () => {
   render(<MemoryRouter><DressCodeDetail dressCode={blackTie} /></MemoryRouter>);
   fireEvent.click(screen.getByRole('tab', { name: /👗 women/i }));
   expect(screen.getByRole('tab', { name: /👗 women/i })).toHaveAttribute('aria-selected', 'true');
+});
+
+test('shows carousel navigation counter', () => {
+  render(<MemoryRouter><DressCodeDetail dressCode={blackTie} /></MemoryRouter>);
+  expect(screen.getByText('2 / 17')).toBeInTheDocument();
+});
+
+test('disables previous navigation on the first dress code', () => {
+  render(<MemoryRouter><DressCodeDetail dressCode={whiteTie} /></MemoryRouter>);
+  expect(screen.getByRole('button', { name: /previous dress code/i })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /next dress code/i })).toBeEnabled();
 });
 
 test('shows shoe colour', () => {

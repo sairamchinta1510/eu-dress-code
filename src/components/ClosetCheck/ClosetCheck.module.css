@@ -187,3 +187,27 @@
   flex-shrink: 0;
   text-decoration: none;
 }
+
+.suitableItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.viewLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.viewLink:hover {
+  text-decoration: underline;
+}

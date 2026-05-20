@@ -1,61 +1,295 @@
+/* ── Page ───────────────────────────────────────────────── */
 .page {
   min-height: 100vh;
   padding-bottom: var(--nav-height);
   background: var(--bg);
 }
 
-.header {
-  background: linear-gradient(160deg, #161b22 0%, #0d1117 100%);
-  padding: 20px 16px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.headerTop {
+/* ── Hero: split — text left, photo right ───────────────── */
+.hero {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 14px;
+  min-height: 92vh;
+  max-height: 860px;
 }
 
-.accentBar {
-  width: 4px;
-  min-height: 36px;
-  background: linear-gradient(180deg, #ff6b6b, #ffa500);
-  border-radius: 2px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  margin: 0 0 3px;
-  color: #fff;
-}
-
-.subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.searchWrapper {
-  position: relative;
-}
-
-.grid {
-  padding: 14px;
+/* Left panel: solid dark background, all text lives here */
+.heroLeft {
+  flex: 0 0 48%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: center;
+  padding: 56px 48px 48px 24px;
+  background: var(--bg);
+  position: relative;
+  z-index: 2;
 }
 
-.sectionLabel {
-  font-size: 10px;
+/* Subtle right-edge glow to blend into photo */
+.heroLeft::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -32px;
+  bottom: 0;
+  width: 32px;
+  background: linear-gradient(to right, var(--bg), transparent);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Right panel: photo fills the space */
+.heroRight {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #d6cfc8;
+}
+
+.heroImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+}
+
+/* Side-by-side men/women photos */
+.heroPhotoSplit {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.heroPhotoHalf {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Thin divider between the two photos */
+.heroPhotoHalf:first-child {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.heroPhotoTag {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13, 17, 23, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+/* Dress code label badge over the photo */
+.heroImgLabel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(13, 17, 23, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 6px 14px;
+}
+
+.heroImgIcon { font-size: 16px; }
+
+.heroImgName {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+
+.heroEyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 14px;
+}
+
+.heroTitle {
+  font-size: clamp(40px, 5vw, 68px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -2px;
+  color: var(--text);
+  margin: 0 0 18px;
+}
+
+.heroSub {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 28px;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.heroSearch {
+  max-width: 360px;
+}
+
+/* ── Mobile: stacked — photo on top, text below ─────────── */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    min-height: unset;
+    max-height: unset;
+  }
+
+  .heroRight {
+    height: 62vw;
+    min-height: 260px;
+    max-height: 380px;
+    flex: none;
+  }
+
+  .heroImg {
+    object-position: center 10%;
+  }
+
+  .heroLeft {
+    flex: none;
+    padding: 24px 20px 28px;
+  }
+
+  .heroLeft::after { display: none; }
+
+  .heroTitle {
+    font-size: clamp(36px, 9vw, 52px);
+  }
+
+  .heroSub {
+    max-width: 100%;
+  }
+
+  .heroSearch {
+    max-width: 100%;
+  }
+}
+
+/* ── Featured horizontal scroll ────────────────────────── */
+.featuredSection {
+  padding: 28px 0 8px;
+}
+
+.featuredHeading {
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 2px;
+  padding: 0 20px;
+  margin: 0 0 14px;
 }
+
+.featuredScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 20px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.featuredScroll::-webkit-scrollbar { display: none; }
+
+.featuredCard {
+  position: relative;
+  flex-shrink: 0;
+  width: 140px;
+  height: 200px;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+.featuredCard:hover { transform: translateY(-3px); }
+
+.featuredImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+}
+
+.featuredOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(13,17,23,0.88) 0%, transparent 55%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px 10px;
+}
+
+.featuredIcon {
+  font-size: 18px;
+  margin-bottom: 3px;
+}
+
+.featuredName {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.featuredLabel {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── All dress codes grouped ───────────────────────────── */
+.allSection {
+  padding: 8px 0 24px;
+}
+
+.group {
+  margin-bottom: 28px;
+}
+
+.groupHeading {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 20px;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.groupHeading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.groupList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 14px;
+}
+

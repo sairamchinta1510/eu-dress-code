@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { DressCode } from '../types';
+import { DressCode, AiRecommendation } from '../types';
 
 export interface SearchResult {
   dressCode: DressCode;
@@ -12,6 +12,7 @@ const allAsResults = (dressCodes: DressCode[]): SearchResult[] =>
 
 export const useLLMSearch = (dressCodes: DressCode[]) => {
   const [results, setResults] = useState<SearchResult[]>(() => allAsResults(dressCodes));
+  const [recommendation, setRecommendation] = useState<AiRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -19,6 +20,7 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
   const search = useCallback(async (query: string) => {
     if (!query.trim()) {
       setResults(allAsResults(dressCodes));
+      setRecommendation(null);
       setError(null);
       return;
     }
@@ -45,7 +47,11 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
         signal: controller.signal,
       });
 
-      const data = await res.json() as { results?: { id: string; relevance: number; reason: string }[]; error?: string };
+      const data = await res.json() as {
+        results?: { id: string; relevance: number; reason: string }[];
+        recommendation?: AiRecommendation | null;
+        error?: string;
+      };
 
       if (!res.ok) {
         throw new Error(data.error ?? 'Search failed');
@@ -59,12 +65,14 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
         .filter((r): r is SearchResult => r !== null);
 
       setResults(mapped);
+      setRecommendation(data.recommendation ?? null);
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
         return; // Stale request cancelled — do not update state
       }
       setError(err instanceof Error ? err.message : 'Search failed');
       setResults([]);
+      setRecommendation(null);
     } finally {
       // Only clear loading if this is still the current request
       if (abortControllerRef.current === controller) {
@@ -73,5 +81,5 @@ export const useLLMSearch = (dressCodes: DressCode[]) => {
     }
   }, [dressCodes]);
 
-  return { results, loading, error, search };
+  return { results, recommendation, loading, error, search };
 };

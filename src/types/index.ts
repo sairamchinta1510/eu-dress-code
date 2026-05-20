@@ -36,4 +36,17 @@ export interface ClosetResult {
   found: string[];
   missing: string[];
   suggestions: string[];
+  suitableFor?: Array<{ id: string; name: string }>;
+}
+
+export interface AiRecommendation {
+  name: string;
+  description: string;
+  occasions: string[];
+  formality: 1 | 2 | 3 | 4 | 5;
+  formalityLabel: string;
+  menOutfit: string;
+  womenOutfit: string;
+  menPhoto?: string;
+  womenPhoto?: string;
 }
