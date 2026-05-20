@@ -292,7 +292,7 @@
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 30%;
   border-radius: 8px;
   display: block;
 }
@@ -302,3 +302,4 @@
   font-weight: 700;
   color: var(--text-muted);
 }
+

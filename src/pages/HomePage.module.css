@@ -49,7 +49,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 30%;
   display: block;
 }
 
@@ -159,7 +159,7 @@
   }
 
   .heroImg {
-    object-position: center 10%;
+    object-position: center 30%;
   }
 
   .heroLeft {
@@ -273,7 +273,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 30%;
   display: block;
 }
 
@@ -342,4 +342,5 @@
   gap: 8px;
   padding: 0 14px;
 }
+
 
