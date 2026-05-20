@@ -3,6 +3,7 @@ import { APIGatewayProxyResultV2 } from 'aws-lambda';
 
 const ssmClient = new SSMClient({});
 let cachedApiKey: string | null = null;
+let cachedPexelsKey: string | null = null;
 
 export async function getGeminiApiKey(): Promise<string> {
   if (cachedApiKey) return cachedApiKey;
@@ -19,6 +20,22 @@ export async function getGeminiApiKey(): Promise<string> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(`Failed to retrieve API key from SSM: ${msg}`);
+  }
+}
+
+/** Returns Pexels API key or null if not configured */
+export async function getPexelsApiKey(): Promise<string | null> {
+  if (cachedPexelsKey !== null) return cachedPexelsKey || null;
+  const paramName = process.env.PEXELS_SSM_PARAM ?? '/eu-dress-code/PEXELS_API_KEY';
+  try {
+    const result = await ssmClient.send(
+      new GetParameterCommand({ Name: paramName, WithDecryption: true })
+    );
+    cachedPexelsKey = result.Parameter?.Value ?? '';
+    return cachedPexelsKey || null;
+  } catch {
+    cachedPexelsKey = '';
+    return null;
   }
 }
 

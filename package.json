@@ -48,6 +48,8 @@
     ]
   },
   "devDependencies": {
+    "@aws-sdk/client-ssm": "^3.1048.0",
+    "@types/aws-lambda": "^8.10.161",
     "@vercel/node": "^5.8.0"
   }
 }

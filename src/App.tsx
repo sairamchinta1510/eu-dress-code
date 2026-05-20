@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import DressCodePage from './pages/DressCodePage';
 import CalendarPage from './pages/CalendarPage';
 import ClosetPage from './pages/ClosetPage';
+import SearchPage from './pages/SearchPage';
 import styles from './App.module.css';
 
 const App: React.FC = () => (
@@ -19,6 +20,7 @@ const App: React.FC = () => (
             <Route path="/dress-codes/:id" element={<DressCodePage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/closet" element={<ClosetPage />} />
+            <Route path="/search" element={<SearchPage />} />
           </Routes>
         </main>
         <BottomNav />

@@ -24,3 +24,8 @@ yarn-debug.log*
 yarn-error.log*
 
 cdk-outputs.json
+
+# CDK build artifacts and infra dependencies
+infra/cdk.out/
+infra/node_modules/
+test-payload.json

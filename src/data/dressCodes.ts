@@ -3,7 +3,7 @@ import { DressCode } from '../types';
 // Photos: Verified Pexels photo IDs (CDN, no API key required)
 // Format: https://images.pexels.com/photos/{ID}/pexels-photo-{ID}.jpeg
 const P = (id: number) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop`;
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=800&h=1100&dpr=1`;
 const PHOTO = {
   // Men — formal to casual (verified Pexels IDs)
   whiteTieMen:    P(35073009), // Elegant man in white tuxedo for formal event
@@ -32,6 +32,18 @@ const PHOTO = {
   smartCasualWomen: P(36128756), // Casual street style fashion portrait
   resortWomen:      P(14749667), // Woman in sundress standing on sea shore
   casualWomen:      P(22223042), // Woman in jeans, casual fashion
+
+  // New European dress codes — all CDN-verified
+  festiveMen:        P(8915493),   // Man in Purple Velvet Blazer
+  festiveWomen:      P(36613636),  // Elegant Woman in Black Sequin Dress
+  smartElegantMen:   P(30033733),  // Elegant Portrait of Man in Dark Suit
+  smartElegantWomen: P(19088625),  // Brunette Woman in Black Midi Dress
+  gardenPartyMen:    P(12515242),  // Man in Linen Suit (full body, shoes section)
+  gardenPartyWomen:  P(33198230),  // Elegant Woman in Floral Dress, Garden Background
+  apresMen:          P(2869129),   // Standing Man in Red Turtleneck (full body)
+  apresWomen:        P(661899),    // Woman in Gray Sweater (Elegant, Fashion Model)
+  countryMen:        P(15129662),  // Stylish Man in Tweed Coat
+  countryWomen:      P(18053621),  // Young Woman in Grey Tweed Pea Coat
 };
 
 export const dressCodes: DressCode[] = [
@@ -41,7 +53,7 @@ export const dressCodes: DressCode[] = [
     icon: '🎩',
     formality: 5,
     formalityLabel: 'Ultra Formal',
-    occasions: ['State banquets', 'Opera galas', 'Royal events', 'Formal balls'],
+    occasions: ['State banquets', 'Opera galas', 'Royal events', 'Formal balls', 'Vienna Opera Ball', 'Viennese Balls'],
     description: 'The most formal dress code in existence. Reserved for the grandest ceremonial occasions.',
     keywords: ['white tie', 'cravate blanche', 'ultra formal', 'ball', 'state banquet', 'tailcoat'],
     men: {
@@ -58,8 +70,8 @@ export const dressCodes: DressCode[] = [
     women: {
       photo: PHOTO.whiteTieWomen,
       jacket: 'Opera coat or fur stole (optional)',
-      top: 'Full-length ball gown or formal evening dress',
-      bottom: 'Floor-length skirt — ball gown or A-line silhouette',
+      top: 'Full-length formal ball gown — floor-length is mandatory',
+      bottom: 'Floor-length gown skirt — A-line, full, or column silhouette',
       accessories: ['Long gloves (elbow or above)', 'Tiara or formal jewellery', 'Structured evening clutch'],
       shoeType: 'Court heel or strappy evening sandal',
       shoeColour: 'Satin to match gown, or silver/gold',
@@ -73,7 +85,7 @@ export const dressCodes: DressCode[] = [
     icon: '🕴️',
     formality: 5,
     formalityLabel: 'Very Formal',
-    occasions: ['Award ceremonies', 'Charity galas', 'Formal dinners', 'Corporate black tie events'],
+    occasions: ['Award ceremonies', 'Charity galas', 'Formal dinners', 'Corporate black tie events', 'Cannes Film Festival', 'BAFTA ceremony'],
     description: 'Classic evening formality. The tuxedo is king for men; floor-length elegance for women.',
     keywords: ['black tie', 'tuxedo', 'dinner jacket', 'gala', 'formal dinner', 'award', 'evening'],
     men: {
@@ -90,8 +102,8 @@ export const dressCodes: DressCode[] = [
     women: {
       photo: PHOTO.blackTieWomen,
       jacket: 'Elegant wrap or tailored evening jacket (optional)',
-      top: 'Floor-length evening gown or chic tailored jumpsuit in luxe fabric',
-      bottom: 'Floor-length skirt or wide-leg evening trousers',
+      top: 'Floor-length evening gown in silk, satin, or velvet; or tailored silk jumpsuit',
+      bottom: 'Floor-length gown skirt; or wide-leg trousers if wearing a silk jumpsuit',
       accessories: ['Evening clutch', 'Statement jewellery', 'Wrap or shawl (optional)'],
       shoeType: 'Strappy heeled sandal or court heel',
       shoeColour: 'Black, gold, silver, or nude',
@@ -105,7 +117,7 @@ export const dressCodes: DressCode[] = [
     icon: '✨',
     formality: 4,
     formalityLabel: 'Formal',
-    occasions: ['Upscale weddings', 'Charity fundraisers', 'Formal anniversary dinners'],
+    occasions: ['Upscale weddings', 'Charity fundraisers', 'Formal anniversary dinners', 'Gala evenings', 'Semi-formal corporate dinners', 'Prestigious awards ceremonies'],
     description: 'Flexibility between black tie and a very smart lounge suit. Tuxedo welcome but not required.',
     keywords: ['black tie optional', 'formal', 'wedding', 'smart', 'evening'],
     men: {
@@ -137,7 +149,7 @@ export const dressCodes: DressCode[] = [
     icon: '🎖️',
     formality: 4,
     formalityLabel: 'Formal (Daytime)',
-    occasions: ['Royal Ascot', 'Formal daytime weddings', 'Graduation ceremonies', 'Garden parties at palaces'],
+    occasions: ['Royal Ascot', 'Henley Royal Regatta', 'Cheltenham Festival', 'Formal daytime weddings', 'Graduation ceremonies', 'Garden parties at palaces'],
     description: 'Traditional formal daytime attire. The only occasion to wear a tailcoat before 6 pm.',
     keywords: ['morning dress', 'ascot', 'wedding', 'daytime formal', 'top hat', 'tailcoat'],
     men: {
@@ -154,8 +166,8 @@ export const dressCodes: DressCode[] = [
     women: {
       photo: PHOTO.morningWomen,
       jacket: 'Tailored jacket or smart coat',
-      top: 'Smart day dress or skirt suit in muted tones',
-      bottom: 'Midi-length skirt or tailored dress',
+      top: 'Smart structured day dress or tailored blouse in pastel or muted tones',
+      bottom: 'Midi-length tailored skirt; or wear a complete day dress without a separate bottom',
       accessories: ['Hat or fascinator (required at Ascot)', 'Smart gloves', 'Structured handbag'],
       shoeType: 'Court shoe or block heel',
       shoeColour: 'Nude, navy, grey, or cream',
@@ -164,12 +176,44 @@ export const dressCodes: DressCode[] = [
     },
   },
   {
+    id: 'smart-elegant',
+    name: 'Smart Elegant',
+    icon: '🥂',
+    formality: 4,
+    formalityLabel: 'Elegantly Formal',
+    occasions: ['Michelin-star restaurants', 'Paris theatre premieres', 'Monaco galas', 'Milan opera evenings', 'Brussels diplomatic dinners'],
+    description: 'The French and Italian standard for elevated evening outings. More fashion-forward than lounge suit, less strict than black tie. Used widely across Southern Europe.',
+    keywords: ['smart elegant', 'tenue élégante', 'french formal', 'italian style', 'monaco', 'chic', 'elegante'],
+    men: {
+      photo: PHOTO.smartElegantMen,
+      jacket: 'Dark or navy suit with a fashion-forward cut, or tailored blazer',
+      top: 'Quality dress shirt — white, ecru, or deep colour — may skip tie',
+      bottom: 'Matching tailored trousers, well-cut and pressed',
+      accessories: ['Pocket square in silk', 'Smart watch or cufflinks', 'Minimalist tie optional'],
+      shoeType: 'Oxford, loafer, or sleek Derby',
+      shoeColour: 'Black, dark tan, or burgundy',
+      dos: ['Fit is everything — a well-cut suit says it all', 'Going tieless is acceptable with the right shirt', 'Add one quality accent piece (watch, cufflinks, pocket square)'],
+      donts: ['Do not wear a lounge suit that looks off-the-rack', 'Avoid casual shoes', 'Do not over-accessorise'],
+    },
+    women: {
+      photo: PHOTO.smartElegantWomen,
+      jacket: 'Structured blazer or elegant wrap (optional)',
+      top: 'Sophisticated midi dress or elegant silk blouse — the centrepiece of the look',
+      bottom: 'Midi-length skirt or wide-leg trousers if wearing separates',
+      accessories: ['Statement jewellery', 'Quality clutch or structured bag', 'Silk scarf (optional)'],
+      shoeType: 'Block heel, court heel, or strappy sandal',
+      shoeColour: 'Black, nude, or deep jewel tone',
+      dos: ['Invest in one quality garment rather than several fast-fashion pieces', 'French chic: understated but intentional', 'Perfume and posture complete the look'],
+      donts: ['Avoid anything that looks costume-like', 'Do not wear heavily embellished casual items', 'Avoid overly revealing necklines'],
+    },
+  },
+  {
     id: 'creative-black-tie',
     name: 'Creative Black Tie',
     icon: '🎨',
     formality: 4,
     formalityLabel: 'Formal Creative',
-    occasions: ['Art galas', 'Fashion industry events', 'Creative industry awards', 'Film premieres'],
+    occasions: ['Art galas', 'Fashion industry events', 'Creative industry awards', 'Film premieres', 'Venice Film Festival', 'Cannes after-parties'],
     description: 'Black tie with personality. Follow the black tie framework but inject colour, texture, or bold accessories.',
     keywords: ['creative black tie', 'art gala', 'fashion', 'premiere', 'bold', 'velvet', 'colour'],
     men: {
@@ -218,13 +262,45 @@ export const dressCodes: DressCode[] = [
     women: {
       photo: PHOTO.cocktailWomen,
       jacket: 'Evening jacket or blazer (optional)',
-      top: 'Knee-length cocktail dress or chic midi with elegant top',
+      top: 'Knee-length cocktail dress; or chic midi skirt with an elegant blouse',
       bottom: 'Knee to midi length skirt',
       accessories: ['Clutch or small structured bag', 'Elegant jewellery'],
       shoeType: 'Heeled sandal, court heel, or dressy flat',
       shoeColour: 'Black, nude, metallic (gold or silver)',
       dos: ['Knee-length is the classic choice', 'Heels are expected', 'Keep accessories elegant'],
       donts: ['Avoid floor-length (too formal)', 'Do not wear casual flats', 'Avoid overly casual bags'],
+    },
+  },
+  {
+    id: 'festive',
+    name: 'Festive Attire',
+    icon: '🎄',
+    formality: 3,
+    formalityLabel: 'Festive Smart',
+    occasions: ['Christmas work parties', 'Scandinavian julefrokost', 'Dutch Sinterklaas dinners', 'Austrian Advent parties', 'New Year\'s Eve dinners', 'Nordic festive gatherings', 'German Weihnachtsfeier', 'Holiday galas'],
+    description: 'A Northern European staple — smarter than business casual, less strict than cocktail. Embrace seasonal colours, velvet, and metallic accents while staying polished.',
+    keywords: ['festive', 'christmas party', 'julefrokost', 'new years', 'holiday party', 'seasonal', 'nordic'],
+    men: {
+      photo: PHOTO.festiveMen,
+      jacket: 'Velvet blazer, festive suit jacket, or deep-coloured dinner jacket',
+      top: 'Quality dress shirt or festive patterned shirt (subtle)',
+      bottom: 'Dark suit trousers or well-pressed smart chinos',
+      accessories: ['Festive tie or bow tie', 'Pocket square in seasonal colour', 'Smart watch'],
+      shoeType: 'Oxford, Derby, or Chelsea boot',
+      shoeColour: 'Black, burgundy, or dark tan',
+      dos: ['Velvet in deep green, burgundy, or navy is perfect', 'A subtle festive tie is encouraged', 'Embrace seasonal colours — forest green, deep red, midnight blue'],
+      donts: ['Avoid overly garish novelty jumpers for smart events', 'Do not underdress with casual jeans', 'Avoid trainers'],
+    },
+    women: {
+      photo: PHOTO.festiveWomen,
+      jacket: 'Velvet blazer, sequin jacket, or festive wrap',
+      top: 'Cocktail dress, sequin mini, or festive midi in luxe fabric',
+      bottom: 'Midi skirt, tailored party trousers, or fitted dress',
+      accessories: ['Statement jewellery — sparkle is expected', 'Evening clutch', 'Metallic or velvet shoes'],
+      shoeType: 'Heeled sandal, court heel, or velvet pump',
+      shoeColour: 'Gold, silver, black, or deep jewel tone',
+      dos: ['Sequins, velvet, and metallics are entirely appropriate', 'A statement necklace or earrings elevate any look', 'Embrace the season — red, green, gold, midnight blue'],
+      donts: ['Avoid overly casual clothing at company parties', 'Do not underdress if the invitation says "festive attire"', 'Avoid heavy daytime looks'],
     },
   },
   {
@@ -324,6 +400,102 @@ export const dressCodes: DressCode[] = [
     },
   },
   {
+    id: 'garden-party',
+    name: 'Garden Party',
+    icon: '🌸',
+    formality: 2,
+    formalityLabel: 'Smart Outdoor',
+    occasions: ['Chelsea Flower Show', 'Wimbledon social', 'English country house parties', 'European summer receptions', 'Outdoor wedding receptions', 'Royal garden parties'],
+    description: 'Elegant but outdoor-appropriate. Think floral prints, linen, and lighter fabrics — smart enough to impress but practical enough for a garden.',
+    keywords: ['garden party', 'outdoor', 'summer smart', 'chelsea', 'wimbledon', 'english country', 'floral', 'linen'],
+    men: {
+      photo: PHOTO.gardenPartyMen,
+      jacket: 'Linen suit jacket or unstructured blazer in light tone',
+      top: 'Open-collar shirt — fine linen, chambray, or Oxford cloth',
+      bottom: 'Linen or cotton suit trousers in cream, light grey, or pale blue',
+      accessories: ['Smart watch', 'Pocket square in floral or pastel', 'Sunglasses'],
+      shoeType: 'Leather loafer, suede Derby, or smart espadrille',
+      shoeColour: 'Tan, cream, light brown, or off-white',
+      dos: ['Light colours and fabrics are ideal', 'Linen crinkles — embrace it or iron it just before leaving', 'A floral or pastel pocket square adds the right touch'],
+      donts: ['Avoid heavy wool suits in summer heat', 'Do not wear dark formal city shoes', 'Avoid neon or overly casual prints'],
+    },
+    women: {
+      photo: PHOTO.gardenPartyWomen,
+      jacket: 'Light blazer, floral kimono, or structured cardigan',
+      top: 'Floral midi dress, sundress, or co-ord set in pastel or botanical print',
+      bottom: 'Midi skirt, floral dress, or tailored wide-leg in light fabric',
+      accessories: ['Hat or fascinator', 'Wicker or structured bag', 'Layered delicate jewellery'],
+      shoeType: 'Block heel, wedge, or smart flat sandal (avoid stilettos on grass)',
+      shoeColour: 'Nude, pastel, white, or floral-print-matched',
+      dos: ['Floral prints are the quintessential garden party choice', 'A hat is always appropriate and often expected', 'Block heels or wedges are kinder on grass than stilettos'],
+      donts: ['Avoid stiletto heels that sink into lawn', 'Do not wear heavy winter fabrics', 'Avoid overly dark or formal colours'],
+    },
+  },
+  {
+    id: 'apres-ski',
+    name: 'Après-Ski',
+    icon: '⛷️',
+    formality: 2,
+    formalityLabel: 'Alpine Smart',
+    occasions: ['Courchevel après-ski bars', 'St Moritz social events', 'Kitzbühel Hahnenkamm week', 'Alpine hotel dinners', 'Swiss chalet parties', 'Verbier après scene'],
+    description: 'Smart-casual with an Alpine twist. After a day on the slopes, the après-ski scene in Courchevel, St Moritz, and Verbier demands polished but cosy mountain style.',
+    keywords: ['après-ski', 'ski resort', 'alpine', 'courchevel', 'st moritz', 'verbier', 'kitzbühel', 'mountain'],
+    men: {
+      photo: PHOTO.apresMen,
+      jacket: 'Smart down gilet, luxe puffer vest, or tailored après jacket; cashmere open cardigan indoors',
+      top: 'Fine-knit cashmere roll neck, quality wool sweater, or quality flannel shirt',
+      bottom: 'Dark smart jeans, ski-fit trousers, or tailored cord trousers',
+      accessories: ['Quality watch (sport or smart)', 'Beanie hat (optional)', 'Ski pass or badge (optional style touch)'],
+      shoeType: 'Après boot, smart ankle boot, or luxury snow boot',
+      shoeColour: 'Brown, cognac, cream, or natural leather',
+      dos: ['Cashmere is the Alpine luxury standard', 'Dark jeans + roll neck + quality boots = fail-safe après look', 'A good watch works as both smart and sporty accessory'],
+      donts: ['Avoid skiing directly into bars without changing', 'Do not wear dirty ski gear to the après scene', 'Avoid overly casual hoodies in smart venues'],
+    },
+    women: {
+      photo: PHOTO.apresWomen,
+      jacket: 'Fur-trimmed parka, luxe puffer, or cashmere wrap',
+      top: 'Fine-knit roll neck, cashmere jumper, or smart après blouse',
+      bottom: 'Ski-fit or tailored trousers, dark jeans, or après mini skirt with thermal tights',
+      accessories: ['Fur or faux-fur accessory', 'Quality boots', 'Oversized sunglasses'],
+      shoeType: 'Fur-lined après boot, luxury snow boot, or smart ankle boot',
+      shoeColour: 'Brown, cream, cognac, or black',
+      dos: ['Luxe winter fabrics are entirely on-brand', 'A fur-trim or sheepskin detail elevates mountain casual to après chic', 'Après is one of the few occasions where an oversized sweater dress is the perfect choice'],
+      donts: ['Avoid looking like you just stepped off the slopes without any refresh', 'Do not wear heavy summer sandals', 'Avoid anything that looks too city-formal'],
+    },
+  },
+  {
+    id: 'country-house',
+    name: 'Country House',
+    icon: '🏡',
+    formality: 2,
+    formalityLabel: 'Country Smart',
+    occasions: ['British country house weekends', 'Irish estate gatherings', 'Equestrian events', 'Tattersalls sales', 'Point-to-point races', 'Scottish Highland games', 'Glyndebourne Festival Opera'],
+    description: 'The British and Irish countryside dress code. Tweed, checks, and quality natural fabrics. Practical yet effortlessly elegant — the antithesis of city smart.',
+    keywords: ['country house', 'tweed', 'equestrian', 'british countryside', 'hunt', 'highland', 'rural smart', 'Irish'],
+    men: {
+      photo: PHOTO.countryMen,
+      jacket: 'Tweed sport coat, check blazer, or Barbour wax jacket (outdoors)',
+      top: 'Tattersall check or Oxford cloth shirt, quality knit jumper under jacket',
+      bottom: 'Corduroy or moleskin trousers, or smart flat-front chinos in earthy tones',
+      accessories: ['Woollen tie or cravat', 'Leather belt', 'Flat cap (optional outdoors)'],
+      shoeType: 'Country brogue, Derby, or chelsea boot',
+      shoeColour: 'Tan, brown, or dark tan — never black in the country',
+      dos: ['Brown or tan shoes are the only correct choice — black shoes are a city thing', 'A tweed jacket covers all country house occasions', 'Natural fabrics: wool, cotton, moleskin'],
+      donts: ['Never wear black Oxford shoes in a country setting', 'Avoid city suits — they look out of place', 'Do not wear overly casual trainers to equestrian or house party events'],
+    },
+    women: {
+      photo: PHOTO.countryWomen,
+      jacket: 'Tweed jacket, quilted gilet, or Barbour-style wax coat',
+      top: 'Fine-knit roll neck, checked shirt, or quality blouse',
+      bottom: 'Corduroy skirt, tweed trousers, or smart well-cut jeans',
+      accessories: ['Woven or leather belt', 'Silk or woollen neck scarf', 'Flat cap or wide-brim felt hat (outdoors)'],
+      shoeType: 'Country brogue, leather flat, chelsea boot, or rubber-soled leather boot for outdoors',
+      shoeColour: 'Tan, brown, cognac, or olive',
+      dos: ['Tweed in earthy tones is quintessentially right', 'Layering is key for unpredictable country weather', 'A quilted gilet works over a knit or shirt for practical outdoor elegance'],
+      donts: ['Avoid stilettos on gravel or grass', 'Do not dress as if going to a city office', 'Avoid synthetic fabrics — natural materials always look better in country contexts'],
+    },
+  },
+  {
     id: 'smart-casual',
     name: 'Smart Casual',
     icon: '🧥',
@@ -361,7 +533,7 @@ export const dressCodes: DressCode[] = [
     icon: '🌴',
     formality: 1,
     formalityLabel: 'Relaxed',
-    occasions: ['Garden parties', 'Yacht events', 'Beach weddings', 'Outdoor festivals', 'Mediterranean holidays'],
+    occasions: ['Yacht events', 'Beach weddings', 'Outdoor festivals', 'Mediterranean holidays', 'Côte d\'Azur lunches', 'Outdoor hotel terraces'],
     description: 'Relaxed and summery but still put-together. Linen is your best friend.',
     keywords: ['resort', 'outdoor', 'garden party', 'yacht', 'beach wedding', 'casual outdoor', 'linen', 'summer'],
     men: {
