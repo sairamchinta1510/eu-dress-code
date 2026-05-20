@@ -49,4 +49,6 @@ export interface AiRecommendation {
   womenOutfit: string;
   menPhoto?: string;
   womenPhoto?: string;
+  menPhotoSearch?: string;
+  womenPhotoSearch?: string;
 }

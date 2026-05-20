@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { dressCodes } from '../data/dressCodes';
-import { DressCode } from '../types';
+import { DressCode, AiRecommendation } from '../types';
 import { useLLMSearch } from '../hooks/useLLMSearch';
 import { useGeolocation } from '../hooks/useGeolocation';
 import styles from './SearchPage.module.css';
@@ -41,34 +41,112 @@ const shopLinksForCode = (dc: DressCode) => {
   return onlineStores(menTerm, womenTerm, dc.formality);
 };
 
-/** A dress code result card with photos + shopping links */
+/** A full dress-code detail card matching the DressCodeDetail layout */
 const ResultCard: React.FC<{
   dc: DressCode;
   reason?: string;
   coords?: { lat: number; lng: number } | null;
 }> = ({ dc, reason, coords }) => {
-  const shops    = shopLinksForCode(dc);
-  const mapTerm  = storeSearchTerm(dc.formality);
-  const gMaps    = mapsUrl(mapTerm, coords?.lat, coords?.lng);
+  const [tab, setTab] = React.useState<'men' | 'women'>('men');
+  const outfit = tab === 'men' ? dc.men : dc.women;
+  const shops  = shopLinksForCode(dc);
+  const mapTerm = storeSearchTerm(dc.formality);
+  const gMaps   = mapsUrl(mapTerm, coords?.lat, coords?.lng);
+  const shopTerm = tab === 'men'
+    ? toShopTerm(dc.men.jacket || dc.men.top || dc.name + ' men outfit')
+    : toShopTerm(dc.women.top  || dc.women.jacket || dc.name + ' women outfit');
 
   return (
     <div className={styles.resultCard}>
-      <Link to={`/dress-codes/${dc.id}`} className={styles.cardPhotoLink}>
-        <div className={styles.cardPhotos}>
-          <img src={dc.men.photo}   alt={`${dc.name} men`}   className={styles.cardPhoto} />
-          <img src={dc.women.photo} alt={`${dc.name} women`} className={styles.cardPhoto} />
-        </div>
-      </Link>
-      <div className={styles.cardBody}>
-        <div className={styles.cardTop}>
-          <span className={styles.cardIcon}>{dc.icon}</span>
-          <div>
-            <div className={styles.cardName}>{dc.name}</div>
-            <div className={styles.cardFormality}>{dc.formalityLabel}</div>
+      {/* ── Left: photo panel ── */}
+      <div className={styles.cardImagePanel}>
+        <img
+          key={outfit.photo}
+          src={outfit.photo}
+          alt={`${dc.name} ${tab}`}
+          className={styles.cardHeroImg}
+        />
+        <div className={styles.cardFormalityOverlay}>
+          <span className={styles.cardFormalityLabel}>FORMALITY</span>
+          <div className={styles.cardDots}>
+            {[1,2,3,4,5].map(i => (
+              <span key={i} className={i <= dc.formality ? styles.dotFilled : styles.dotEmpty} />
+            ))}
           </div>
         </div>
-        {reason && <p className={styles.cardReason}>{reason}</p>}
-        <Link to={`/dress-codes/${dc.id}`} className={styles.cardLink}>View Full Guide →</Link>
+      </div>
+
+      {/* ── Right: content panel ── */}
+      <div className={styles.cardContent}>
+        {/* Title row */}
+        <div className={styles.cardTitleRow}>
+          <span className={styles.cardTitleIcon}>{dc.icon}</span>
+          <div>
+            <h3 className={styles.cardTitle}>{dc.name}</h3>
+            <p className={styles.cardFormalityText}>{dc.formalityLabel}</p>
+          </div>
+          <Link to={`/dress-codes/${dc.id}`} className={styles.cardFullGuideBtn}>Full Guide →</Link>
+        </div>
+
+        {/* Occasions */}
+        <div className={styles.cardOccasions}>
+          {dc.occasions.slice(0, 4).map(o => (
+            <span key={o} className={styles.occasionTag}>{o}</span>
+          ))}
+        </div>
+
+        {/* Men / Women tabs */}
+        <div className={styles.cardTabs}>
+          <button
+            className={`${styles.cardTab} ${tab === 'men' ? styles.cardTabActive : ''}`}
+            onClick={() => setTab('men')}
+          >👔 Men</button>
+          <button
+            className={`${styles.cardTab} ${tab === 'women' ? styles.cardTabActive : ''}`}
+            onClick={() => setTab('women')}
+          >👗 Women</button>
+        </div>
+
+        {/* Outfit breakdown */}
+        <p className={styles.outfitBreakdownLabel}>OUTFIT BREAKDOWN</p>
+        <ul className={styles.outfitList}>
+          {outfit.jacket && (
+            <li className={styles.outfitItem}>
+              <span className={styles.fieldLabel}>JACKET / OUTERWEAR</span>
+              <span className={styles.fieldValue}>{outfit.jacket}</span>
+            </li>
+          )}
+          {outfit.top && (
+            <li className={styles.outfitItem}>
+              <span className={styles.fieldLabel}>TOP / SHIRT</span>
+              <span className={styles.fieldValue}>{outfit.top}</span>
+            </li>
+          )}
+          {outfit.bottom && (
+            <li className={styles.outfitItem}>
+              <span className={styles.fieldLabel}>BOTTOM</span>
+              <span className={styles.fieldValue}>{outfit.bottom}</span>
+            </li>
+          )}
+          {outfit.accessories.length > 0 && (
+            <li className={styles.outfitItem}>
+              <span className={styles.fieldLabel}>ACCESSORIES</span>
+              <span className={styles.fieldValue}>{outfit.accessories.join(', ')}</span>
+            </li>
+          )}
+          {outfit.shoeType && (
+            <li className={styles.outfitItem}>
+              <span className={styles.fieldLabel}>SHOE TYPE</span>
+              <span className={styles.fieldValue}>{outfit.shoeType}</span>
+            </li>
+          )}
+          {outfit.shoeColour && (
+            <li className={`${styles.outfitItem} ${styles.shoeRow}`}>
+              <span className={styles.fieldLabel}>👟 SHOE COLOUR</span>
+              <span className={styles.shoeColourValue}>{outfit.shoeColour}</span>
+            </li>
+          )}
+        </ul>
 
         {/* Shopping links */}
         <div className={styles.cardShops}>
@@ -77,13 +155,102 @@ const ResultCard: React.FC<{
           </a>
           <div className={styles.cardShopGrid}>
             {shops.map(s => (
-              <div key={s.name} className={styles.cardShopRow}>
-                <span className={styles.cardShopName}>{s.name}</span>
-                <div className={styles.cardShopLinks}>
-                  <a href={s.men}   target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👔 Men</a>
-                  <a href={s.women} target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👗 Women</a>
-                </div>
-              </div>
+              <a
+                key={s.name}
+                href={tab === 'men' ? s.men : s.women}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.shopStoreBtn}
+              >
+                {s.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/** Full AI recommendation card — same layout as ResultCard, photo placeholder when no Pexels photo */
+const RecommendationCard: React.FC<{
+  rec: AiRecommendation;
+  coords?: { lat: number; lng: number } | null;
+}> = ({ rec, coords }) => {
+  const [tab, setTab] = React.useState<'men' | 'women'>('men');
+  const photoUrl    = tab === 'men' ? rec.menPhoto    : rec.womenPhoto;
+  const searchTerm  = tab === 'men'
+    ? (rec.menPhotoSearch   || toShopTerm(rec.menOutfit)   + ' fashion')
+    : (rec.womenPhotoSearch || toShopTerm(rec.womenOutfit) + ' fashion');
+  const outfitText  = tab === 'men' ? rec.menOutfit : rec.womenOutfit;
+  const googleImagesUrl = `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}&tbm=isch`;
+  const menTerm   = toShopTerm(rec.menOutfit   || rec.name + ' men outfit');
+  const womenTerm = toShopTerm(rec.womenOutfit || rec.name + ' women outfit');
+  const stores = onlineStores(menTerm, womenTerm, rec.formality);
+  const gMaps  = mapsUrl(storeSearchTerm(rec.formality), coords?.lat, coords?.lng);
+
+  return (
+    <div className={styles.resultCard}>
+      {/* ── Left: photo or placeholder ── */}
+      <div className={styles.cardImagePanel}>
+        {photoUrl ? (
+          <img src={photoUrl} alt={`${rec.name} ${tab}`} className={styles.cardHeroImg} />
+        ) : (
+          <a href={googleImagesUrl} target="_blank" rel="noopener noreferrer" className={styles.photoPlaceholder}>
+            <span className={styles.photoPlaceholderIcon}>{tab === 'men' ? '👔' : '👗'}</span>
+            <span className={styles.photoPlaceholderText}>Browse outfit inspiration</span>
+            <span className={styles.photoPlaceholderQuery}>🔍 {searchTerm}</span>
+          </a>
+        )}
+        <div className={styles.cardFormalityOverlay}>
+          <span className={styles.cardFormalityLabel}>FORMALITY</span>
+          <div className={styles.cardDots}>
+            {[1,2,3,4,5].map(i => (
+              <span key={i} className={i <= rec.formality ? styles.dotFilled : styles.dotEmpty} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Right: content ── */}
+      <div className={styles.cardContent}>
+        <div className={styles.cardTitleRow}>
+          <div style={{ flex: 1 }}>
+            <h3 className={styles.cardTitle}>{rec.name}</h3>
+            <p className={styles.cardFormalityText}>{rec.formalityLabel}</p>
+          </div>
+          <span className={styles.aiBadge}>💡 AI</span>
+        </div>
+
+        <p className={styles.recDescText}>{rec.description}</p>
+
+        {rec.occasions.length > 0 && (
+          <div className={styles.cardOccasions}>
+            {rec.occasions.slice(0, 4).map(o => (
+              <span key={o} className={styles.occasionTag}>{o}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Men / Women tabs */}
+        <div className={styles.cardTabs}>
+          <button className={`${styles.cardTab} ${tab === 'men' ? styles.cardTabActive : ''}`} onClick={() => setTab('men')}>👔 Men</button>
+          <button className={`${styles.cardTab} ${tab === 'women' ? styles.cardTabActive : ''}`} onClick={() => setTab('women')}>👗 Women</button>
+        </div>
+
+        <p className={styles.outfitBreakdownLabel}>OUTFIT</p>
+        <p className={styles.recOutfitText}>{outfitText}</p>
+
+        {/* Shopping */}
+        <div className={styles.cardShops}>
+          <a href={gMaps} target="_blank" rel="noopener noreferrer" className={styles.cardMapsBtn}>
+            📍 {coords ? 'Stores Near You' : 'Find Stores'}
+          </a>
+          <div className={styles.cardShopGrid}>
+            {stores.map(s => (
+              <a key={s.name} href={tab === 'men' ? s.men : s.women} target="_blank" rel="noopener noreferrer" className={styles.shopStoreBtn}>
+                {s.name}
+              </a>
             ))}
           </div>
         </div>
@@ -114,14 +281,7 @@ const SearchPage: React.FC = () => {
     setParams({ q: newQuery });
   };
 
-  // When the AI returns a recommendation but no direct matches, find real dress
-  // codes at the same (or adjacent) formality level to show as concrete cards.
-  const relatedCodes = React.useMemo(() => {
-    if (!recommendation || results.length > 0) return [];
-    const exact = dressCodes.filter(d => d.formality === Math.round(Number(recommendation.formality)));
-    if (exact.length) return exact;
-    return dressCodes.filter(d => Math.abs(d.formality - Math.round(Number(recommendation.formality))) <= 1);
-  }, [recommendation, results]);
+  // (relatedCodes removed — AI recommendation now shown as its own card)
 
   return (
     <div className={styles.page}>
@@ -154,75 +314,11 @@ const SearchPage: React.FC = () => {
         </section>
       )}
 
-      {/* ── AI recommendation + related real dress codes ── */}
+      {/* ── AI recommendation ── */}
       {!loading && recommendation && results.length === 0 && (
         <section className={styles.section}>
-          {/* Context banner */}
-          <div className={styles.recBanner}>
-            <span className={styles.recBadge}>💡 AI Recommendation</span>
-            <h2 className={styles.recName}>{recommendation.name}</h2>
-            <p className={styles.recFormality}>{recommendation.formalityLabel}</p>
-            <p className={styles.recDescription}>{recommendation.description}</p>
-            {recommendation.occasions.length > 0 && (
-              <div className={styles.occasions}>
-                {recommendation.occasions.map(o => (
-                  <span key={o} className={styles.occasionTag}>{o}</span>
-                ))}
-              </div>
-            )}
-            <div className={styles.recOutfitHint}>
-              <span>👔 {recommendation.menOutfit}</span>
-              <span>👗 {recommendation.womenOutfit}</span>
-            </div>
-          </div>
-
-          {/* Real dress code cards at matching formality */}
-          {relatedCodes.length > 0 && (
-            <>
-              <h2 className={styles.sectionTitle} style={{ marginTop: 24 }}>
-                Closest Dress Codes — Shop Now
-              </h2>
-              <div className={styles.resultsGrid}>
-                {relatedCodes.map(dc => (
-                  <ResultCard
-                    key={dc.id}
-                    dc={dc}
-                    reason={`Similar formality to ${recommendation.name}`}
-                    coords={coords}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Store finder for the recommendation itself */}
-          {(() => {
-            const menTerm  = toShopTerm(recommendation.menOutfit);
-            const womenTerm = toShopTerm(recommendation.womenOutfit);
-            const stores   = onlineStores(menTerm, womenTerm, recommendation.formality);
-            const gMaps    = mapsUrl(storeSearchTerm(recommendation.formality), coords?.lat, coords?.lng);
-            return (
-              <div className={styles.storeSection} style={{ marginTop: 24 }}>
-                <h3 className={styles.storeHeader}>
-                  🛍️ Shop "{recommendation.name}" directly
-                </h3>
-                <a href={gMaps} target="_blank" rel="noopener noreferrer" className={styles.mapsBtn}>
-                  🗺️ {coords ? 'Open in Google Maps' : 'Search Stores Near Me'}
-                </a>
-                <div className={styles.onlineGrid} style={{ marginTop: 10 }}>
-                  {stores.map(s => (
-                    <div key={s.name} className={styles.onlineRow}>
-                      <span className={styles.storeName}>{s.name}</span>
-                      <div className={styles.storeLinks}>
-                        <a href={s.men}   target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👔 Men</a>
-                        <a href={s.women} target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👗 Women</a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
+          <h2 className={styles.sectionTitle}>AI Recommendation</h2>
+          <RecommendationCard rec={recommendation} coords={coords} />
         </section>
       )}
 
