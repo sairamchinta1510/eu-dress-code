@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { dressCodes } from '../data/dressCodes';
+import { DressCode } from '../types';
 import { useLLMSearch } from '../hooks/useLLMSearch';
 import { useGeolocation } from '../hooks/useGeolocation';
 import styles from './SearchPage.module.css';
@@ -33,6 +34,64 @@ const onlineStores = (menTerm: string, womenTerm: string, formality: number) => 
   return list;
 };
 
+/** Shopping links for a dress code based on its outfit data */
+const shopLinksForCode = (dc: DressCode) => {
+  const menTerm   = toShopTerm(dc.men.jacket   || dc.men.top    || dc.name + ' men outfit');
+  const womenTerm = toShopTerm(dc.women.top     || dc.women.jacket || dc.name + ' women outfit');
+  return onlineStores(menTerm, womenTerm, dc.formality);
+};
+
+/** A dress code result card with photos + shopping links */
+const ResultCard: React.FC<{
+  dc: DressCode;
+  reason?: string;
+  coords?: { lat: number; lng: number } | null;
+}> = ({ dc, reason, coords }) => {
+  const shops    = shopLinksForCode(dc);
+  const mapTerm  = storeSearchTerm(dc.formality);
+  const gMaps    = mapsUrl(mapTerm, coords?.lat, coords?.lng);
+
+  return (
+    <div className={styles.resultCard}>
+      <Link to={`/dress-codes/${dc.id}`} className={styles.cardPhotoLink}>
+        <div className={styles.cardPhotos}>
+          <img src={dc.men.photo}   alt={`${dc.name} men`}   className={styles.cardPhoto} />
+          <img src={dc.women.photo} alt={`${dc.name} women`} className={styles.cardPhoto} />
+        </div>
+      </Link>
+      <div className={styles.cardBody}>
+        <div className={styles.cardTop}>
+          <span className={styles.cardIcon}>{dc.icon}</span>
+          <div>
+            <div className={styles.cardName}>{dc.name}</div>
+            <div className={styles.cardFormality}>{dc.formalityLabel}</div>
+          </div>
+        </div>
+        {reason && <p className={styles.cardReason}>{reason}</p>}
+        <Link to={`/dress-codes/${dc.id}`} className={styles.cardLink}>View Full Guide →</Link>
+
+        {/* Shopping links */}
+        <div className={styles.cardShops}>
+          <a href={gMaps} target="_blank" rel="noopener noreferrer" className={styles.cardMapsBtn}>
+            📍 {coords ? 'Stores Near You' : 'Find Stores'}
+          </a>
+          <div className={styles.cardShopGrid}>
+            {shops.map(s => (
+              <div key={s.name} className={styles.cardShopRow}>
+                <span className={styles.cardShopName}>{s.name}</span>
+                <div className={styles.cardShopLinks}>
+                  <a href={s.men}   target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👔 Men</a>
+                  <a href={s.women} target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👗 Women</a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SearchPage: React.FC = () => {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -41,7 +100,6 @@ const SearchPage: React.FC = () => {
   const { results, recommendation, loading, error, search } = useLLMSearch(dressCodes);
   const ranRef = useRef(false);
 
-  // Run search whenever the URL query changes
   useEffect(() => {
     if (query && !ranRef.current) {
       ranRef.current = true;
@@ -56,9 +114,17 @@ const SearchPage: React.FC = () => {
     setParams({ q: newQuery });
   };
 
+  // When the AI returns a recommendation but no direct matches, find real dress
+  // codes at the same (or adjacent) formality level to show as concrete cards.
+  const relatedCodes = React.useMemo(() => {
+    if (!recommendation || results.length > 0) return [];
+    const exact = dressCodes.filter(d => d.formality === recommendation.formality);
+    if (exact.length) return exact;
+    return dressCodes.filter(d => Math.abs(d.formality - recommendation.formality) <= 1);
+  }, [recommendation, results]);
+
   return (
     <div className={styles.page}>
-      {/* Search bar at top of results page */}
       <div className={styles.searchHeader}>
         <button className={styles.backBtn} onClick={() => navigate('/')} aria-label="Back">←</button>
         <InlineSearchBar initialQuery={query} onSearch={handleGoSearch} />
@@ -76,50 +142,24 @@ const SearchPage: React.FC = () => {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      {/* Matched dress codes */}
+      {/* ── Direct matches ── */}
       {!loading && results.length > 0 && (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Matching Dress Codes</h2>
           <div className={styles.resultsGrid}>
             {results.map(({ dressCode: dc, reason }) => (
-              <Link key={dc.id} to={`/dress-codes/${dc.id}`} className={styles.resultCard}>
-                <div className={styles.cardPhotos}>
-                  <img src={dc.men.photo}   alt={`${dc.name} men`}   className={styles.cardPhoto} />
-                  <img src={dc.women.photo} alt={`${dc.name} women`} className={styles.cardPhoto} />
-                </div>
-                <div className={styles.cardBody}>
-                  <div className={styles.cardTop}>
-                    <span className={styles.cardIcon}>{dc.icon}</span>
-                    <div>
-                      <div className={styles.cardName}>{dc.name}</div>
-                      <div className={styles.cardFormality}>{dc.formalityLabel}</div>
-                    </div>
-                  </div>
-                  {reason && <p className={styles.cardReason}>{reason}</p>}
-                  <span className={styles.cardLink}>View Guide →</span>
-                </div>
-              </Link>
+              <ResultCard key={dc.id} dc={dc} reason={reason} coords={coords} />
             ))}
           </div>
         </section>
       )}
 
-      {/* AI Recommendation when no existing dress code matches */}
-      {!loading && recommendation && results.length === 0 && (() => {
-        const menTerm   = toShopTerm(recommendation.menOutfit);
-        const womenTerm = toShopTerm(recommendation.womenOutfit);
-        const stores    = onlineStores(menTerm, womenTerm, recommendation.formality);
-        const mapTerm   = storeSearchTerm(recommendation.formality);
-        const gMaps     = mapsUrl(mapTerm, coords?.lat, coords?.lng);
-
-        // Always use Google Image search for AI recommendations — dress code photos
-        // are European-only and will never match culture-specific recommendations
-        const menImgSearch   = `https://www.google.com/search?q=${encodeURIComponent(recommendation.name + ' men outfit')}&tbm=isch`;
-        const womenImgSearch = `https://www.google.com/search?q=${encodeURIComponent(recommendation.name + ' women outfit')}&tbm=isch`;
-
-        return (
-          <section className={styles.section}>
-            <div className={styles.recBadge}>💡 AI Recommendation</div>
+      {/* ── AI recommendation + related real dress codes ── */}
+      {!loading && recommendation && results.length === 0 && (
+        <section className={styles.section}>
+          {/* Context banner */}
+          <div className={styles.recBanner}>
+            <span className={styles.recBadge}>💡 AI Recommendation</span>
             <h2 className={styles.recName}>{recommendation.name}</h2>
             <p className={styles.recFormality}>{recommendation.formalityLabel}</p>
             <p className={styles.recDescription}>{recommendation.description}</p>
@@ -130,69 +170,61 @@ const SearchPage: React.FC = () => {
                 ))}
               </div>
             )}
-
-            {/* Outfit details — real photos when available, image search link as fallback */}
-            <div className={styles.outfitSection}>
-              <div className={styles.outfitCol}>
-                {recommendation.menPhoto
-                  ? <img src={recommendation.menPhoto} alt="Men outfit example" className={styles.outfitPhoto} />
-                  : (
-                    <a
-                      href={menImgSearch}
-                      target="_blank" rel="noopener noreferrer"
-                      className={styles.photoSearchBtn}
-                    >
-                      🔍 See Men's Outfit Examples
-                    </a>
-                  )
-                }
-                <div className={styles.outfitLabel}>👔 Men</div>
-                <p className={styles.outfitText}>{recommendation.menOutfit}</p>
-              </div>
-              <div className={styles.outfitCol}>
-                {recommendation.womenPhoto
-                  ? <img src={recommendation.womenPhoto} alt="Women outfit example" className={styles.outfitPhoto} />
-                  : (
-                    <a
-                      href={womenImgSearch}
-                      target="_blank" rel="noopener noreferrer"
-                      className={styles.photoSearchBtn}
-                    >
-                      🔍 See Women's Outfit Examples
-                    </a>
-                  )
-                }
-                <div className={styles.outfitLabel}>👗 Women</div>
-                <p className={styles.outfitText}>{recommendation.womenOutfit}</p>
-              </div>
+            <div className={styles.recOutfitHint}>
+              <span>👔 {recommendation.menOutfit}</span>
+              <span>👗 {recommendation.womenOutfit}</span>
             </div>
+          </div>
 
-            {/* Stores near you */}
-            <div className={styles.storeSection}>
-              <h3 className={styles.storeHeader}>📍 {coords ? 'Stores Near You' : 'Find Nearby Stores'}</h3>
-              <a href={gMaps} target="_blank" rel="noopener noreferrer" className={styles.mapsBtn}>
-                🗺️ {coords ? 'Open in Google Maps' : 'Search Stores Near Me'}
-              </a>
-            </div>
-
-            {/* Online retailers */}
-            <div className={styles.storeSection}>
-              <h3 className={styles.storeHeader}>🛍️ Buy Online</h3>
-              <div className={styles.onlineGrid}>
-                {stores.map(s => (
-                  <div key={s.name} className={styles.onlineRow}>
-                    <span className={styles.storeName}>{s.name}</span>
-                    <div className={styles.storeLinks}>
-                      <a href={s.men}   target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👔 Men</a>
-                      <a href={s.women} target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👗 Women</a>
-                    </div>
-                  </div>
+          {/* Real dress code cards at matching formality */}
+          {relatedCodes.length > 0 && (
+            <>
+              <h2 className={styles.sectionTitle} style={{ marginTop: 24 }}>
+                Closest Dress Codes — Shop Now
+              </h2>
+              <div className={styles.resultsGrid}>
+                {relatedCodes.map(dc => (
+                  <ResultCard
+                    key={dc.id}
+                    dc={dc}
+                    reason={`Similar formality to ${recommendation.name}`}
+                    coords={coords}
+                  />
                 ))}
               </div>
-            </div>
-          </section>
-        );
-      })()}
+            </>
+          )}
+
+          {/* Store finder for the recommendation itself */}
+          {(() => {
+            const menTerm  = toShopTerm(recommendation.menOutfit);
+            const womenTerm = toShopTerm(recommendation.womenOutfit);
+            const stores   = onlineStores(menTerm, womenTerm, recommendation.formality);
+            const gMaps    = mapsUrl(storeSearchTerm(recommendation.formality), coords?.lat, coords?.lng);
+            return (
+              <div className={styles.storeSection} style={{ marginTop: 24 }}>
+                <h3 className={styles.storeHeader}>
+                  🛍️ Shop "{recommendation.name}" directly
+                </h3>
+                <a href={gMaps} target="_blank" rel="noopener noreferrer" className={styles.mapsBtn}>
+                  🗺️ {coords ? 'Open in Google Maps' : 'Search Stores Near Me'}
+                </a>
+                <div className={styles.onlineGrid} style={{ marginTop: 10 }}>
+                  {stores.map(s => (
+                    <div key={s.name} className={styles.onlineRow}>
+                      <span className={styles.storeName}>{s.name}</span>
+                      <div className={styles.storeLinks}>
+                        <a href={s.men}   target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👔 Men</a>
+                        <a href={s.women} target="_blank" rel="noopener noreferrer" className={styles.buyBtn}>👗 Women</a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </section>
+      )}
 
       {!loading && !error && !recommendation && results.length === 0 && query && (
         <p className={styles.noResults}>No results found. Try a different query.</p>
