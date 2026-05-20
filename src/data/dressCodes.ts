@@ -24,7 +24,7 @@ const PHOTO = {
   blackTieWomen:    P(16894090), // Woman standing in glamorous black evening dress
   blackTieOptWomen: P(1755428),  // Woman in red formal dress on staircase
   morningWomen:     P(32794217), // Elegant woman in vintage hat and dress
-  creativeWomen:    P(34791585), // Stylish woman with bold fashion statement
+  creativeWomen:    P(1021693),  // Woman in bold black polka-dot creative dress
   cocktailWomen:    P(15797138), // Woman in cocktail evening dress
   loungeWomen:      P(5900416),  // Woman in black blazer and pants on street
   bizFormalWomen:   P(7581113),  // Woman wearing a blazer in the office

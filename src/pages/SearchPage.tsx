@@ -118,9 +118,9 @@ const SearchPage: React.FC = () => {
   // codes at the same (or adjacent) formality level to show as concrete cards.
   const relatedCodes = React.useMemo(() => {
     if (!recommendation || results.length > 0) return [];
-    const exact = dressCodes.filter(d => d.formality === recommendation.formality);
+    const exact = dressCodes.filter(d => d.formality === Math.round(Number(recommendation.formality)));
     if (exact.length) return exact;
-    return dressCodes.filter(d => Math.abs(d.formality - recommendation.formality) <= 1);
+    return dressCodes.filter(d => Math.abs(d.formality - Math.round(Number(recommendation.formality))) <= 1);
   }, [recommendation, results]);
 
   return (
