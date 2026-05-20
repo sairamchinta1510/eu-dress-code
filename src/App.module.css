@@ -10,3 +10,10 @@
   padding-bottom: var(--nav-height);
   min-height: 100vh;
 }
+
+/* ── Desktop: full-width layout ─────────────────────────── */
+@media (min-width: 769px) {
+  .app {
+    max-width: 100%;
+  }
+}

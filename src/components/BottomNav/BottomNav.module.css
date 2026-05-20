@@ -4,12 +4,12 @@
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 420px;
+  max-width: 100%;
   height: var(--nav-height);
   background: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -22,7 +22,7 @@
   align-items: center;
   gap: 2px;
   padding: 8px 16px;
-  color: rgba(0, 0, 0, 0.28);
+  color: rgba(255, 255, 255, 0.28);
   transition: color 0.2s;
   flex: 1;
   text-decoration: none;
