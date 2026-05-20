@@ -178,6 +178,11 @@ const RecommendationCard: React.FC<{
   coords?: { lat: number; lng: number } | null;
 }> = ({ rec, coords }) => {
   const [tab, setTab] = React.useState<'men' | 'women'>('men');
+  const [imgError, setImgError] = React.useState(false);
+
+  // Reset error state when tab changes (different photo URL)
+  const handleTabChange = (t: 'men' | 'women') => { setTab(t); setImgError(false); };
+
   const photoUrl    = tab === 'men' ? rec.menPhoto    : rec.womenPhoto;
   const searchTerm  = tab === 'men'
     ? (rec.menPhotoSearch   || toShopTerm(rec.menOutfit)   + ' fashion')
@@ -189,12 +194,19 @@ const RecommendationCard: React.FC<{
   const stores = onlineStores(menTerm, womenTerm, rec.formality);
   const gMaps  = mapsUrl(storeSearchTerm(rec.formality), coords?.lat, coords?.lng);
 
+  const showPhoto = photoUrl && !imgError;
+
   return (
     <div className={styles.resultCard}>
-      {/* ── Left: photo or placeholder ── */}
+      {/* ── Left: photo or Google Images fallback ── */}
       <div className={styles.cardImagePanel}>
-        {photoUrl ? (
-          <img src={photoUrl} alt={`${rec.name} ${tab}`} className={styles.cardHeroImg} />
+        {showPhoto ? (
+          <img
+            src={photoUrl}
+            alt={`${rec.name} ${tab}`}
+            className={styles.cardHeroImg}
+            onError={() => setImgError(true)}
+          />
         ) : (
           <a href={googleImagesUrl} target="_blank" rel="noopener noreferrer" className={styles.photoPlaceholder}>
             <span className={styles.photoPlaceholderIcon}>{tab === 'men' ? '👔' : '👗'}</span>
@@ -234,8 +246,8 @@ const RecommendationCard: React.FC<{
 
         {/* Men / Women tabs */}
         <div className={styles.cardTabs}>
-          <button className={`${styles.cardTab} ${tab === 'men' ? styles.cardTabActive : ''}`} onClick={() => setTab('men')}>👔 Men</button>
-          <button className={`${styles.cardTab} ${tab === 'women' ? styles.cardTabActive : ''}`} onClick={() => setTab('women')}>👗 Women</button>
+          <button className={`${styles.cardTab} ${tab === 'men' ? styles.cardTabActive : ''}`} onClick={() => handleTabChange('men')}>👔 Men</button>
+          <button className={`${styles.cardTab} ${tab === 'women' ? styles.cardTabActive : ''}`} onClick={() => handleTabChange('women')}>👗 Women</button>
         </div>
 
         <p className={styles.outfitBreakdownLabel}>OUTFIT</p>

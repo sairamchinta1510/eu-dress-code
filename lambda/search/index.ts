@@ -38,7 +38,7 @@ async function pexelsPhoto(query: string, apiKey: string): Promise<string | null
   try {
     const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=3&orientation=portrait`;
     const res = await fetch(url, { headers: { Authorization: apiKey } });
-    if (!res.ok) return null;
+    if (res.status === 429 || res.status === 401 || !res.ok) return null; // quota exceeded or invalid key
     const data = await res.json() as { photos: Array<{ src: { large: string } }> };
     return data.photos?.[0]?.src?.large ?? null;
   } catch {
