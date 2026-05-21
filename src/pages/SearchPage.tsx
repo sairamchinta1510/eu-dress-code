@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { dressCodes } from '../data/dressCodes';
-import { DressCode, AiRecommendation } from '../types';
+import { DressCode, AiRecommendation, OutfitDetails } from '../types';
 import { useLLMSearch } from '../hooks/useLLMSearch';
 import { useGeolocation } from '../hooks/useGeolocation';
 import styles from './SearchPage.module.css';
@@ -179,15 +179,14 @@ const RecommendationCard: React.FC<{
 }> = ({ rec, coords }) => {
   const [tab, setTab] = React.useState<'men' | 'women'>('men');
   const [imgError, setImgError] = React.useState(false);
-
-  // Reset error state when tab changes (different photo URL)
   const handleTabChange = (t: 'men' | 'women') => { setTab(t); setImgError(false); };
 
-  const photoUrl    = tab === 'men' ? rec.menPhoto    : rec.womenPhoto;
-  const searchTerm  = tab === 'men'
+  const photoUrl   = tab === 'men' ? rec.menPhoto    : rec.womenPhoto;
+  const details    = (tab === 'men' ? rec.menDetails  : rec.womenDetails) as OutfitDetails | undefined;
+  const outfitText = tab === 'men' ? rec.menOutfit   : rec.womenOutfit;
+  const searchTerm = tab === 'men'
     ? (rec.menPhotoSearch   || toShopTerm(rec.menOutfit)   + ' fashion')
     : (rec.womenPhotoSearch || toShopTerm(rec.womenOutfit) + ' fashion');
-  const outfitText  = tab === 'men' ? rec.menOutfit : rec.womenOutfit;
   const googleImagesUrl = `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}&tbm=isch`;
   const menTerm   = toShopTerm(rec.menOutfit   || rec.name + ' men outfit');
   const womenTerm = toShopTerm(rec.womenOutfit || rec.name + ' women outfit');
@@ -250,8 +249,68 @@ const RecommendationCard: React.FC<{
           <button className={`${styles.cardTab} ${tab === 'women' ? styles.cardTabActive : ''}`} onClick={() => handleTabChange('women')}>👗 Women</button>
         </div>
 
-        <p className={styles.outfitBreakdownLabel}>OUTFIT</p>
-        <p className={styles.recOutfitText}>{outfitText}</p>
+        <p className={styles.outfitBreakdownLabel}>OUTFIT BREAKDOWN</p>
+        {details ? (
+          <>
+            <ul className={styles.outfitList}>
+              {details.jacket && (
+                <li className={styles.outfitItem}>
+                  <span className={styles.fieldLabel}>JACKET / OUTERWEAR</span>
+                  <span className={styles.fieldValue}>{details.jacket}</span>
+                </li>
+              )}
+              {details.top && (
+                <li className={styles.outfitItem}>
+                  <span className={styles.fieldLabel}>TOP / SHIRT</span>
+                  <span className={styles.fieldValue}>{details.top}</span>
+                </li>
+              )}
+              {details.bottom && (
+                <li className={styles.outfitItem}>
+                  <span className={styles.fieldLabel}>BOTTOM</span>
+                  <span className={styles.fieldValue}>{details.bottom}</span>
+                </li>
+              )}
+              {details.accessories && details.accessories.length > 0 && (
+                <li className={styles.outfitItem}>
+                  <span className={styles.fieldLabel}>ACCESSORIES</span>
+                  <span className={styles.fieldValue}>{details.accessories.join(', ')}</span>
+                </li>
+              )}
+              {details.shoeType && (
+                <li className={styles.outfitItem}>
+                  <span className={styles.fieldLabel}>SHOE TYPE</span>
+                  <span className={styles.fieldValue}>{details.shoeType}</span>
+                </li>
+              )}
+              {details.shoeColour && (
+                <li className={`${styles.outfitItem} ${styles.shoeRow}`}>
+                  <span className={styles.fieldLabel}>👟 SHOE COLOUR</span>
+                  <span className={styles.shoeColourValue}>{details.shoeColour}</span>
+                </li>
+              )}
+            </ul>
+
+            {details.dos && details.dos.length > 0 && (
+              <>
+                <p className={styles.outfitBreakdownLabel}>DO'S</p>
+                <ul className={styles.ruleList}>
+                  {details.dos.map((d, i) => <li key={i} className={styles.doItem}>✅ {d}</li>)}
+                </ul>
+              </>
+            )}
+            {details.donts && details.donts.length > 0 && (
+              <>
+                <p className={styles.outfitBreakdownLabel}>DON'TS</p>
+                <ul className={styles.ruleList}>
+                  {details.donts.map((d, i) => <li key={i} className={styles.dontItem}>✕ {d}</li>)}
+                </ul>
+              </>
+            )}
+          </>
+        ) : (
+          <p className={styles.recOutfitText}>{outfitText}</p>
+        )}
 
         {/* Shopping */}
         <div className={styles.cardShops}>
