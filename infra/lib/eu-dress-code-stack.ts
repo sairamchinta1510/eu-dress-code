@@ -10,8 +10,14 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
+import * as cloudwatchActions from 'aws-cdk-lib/aws-cloudwatch-actions';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Construct } from 'constructs';
 import * as path from 'path';
+
+const ALERT_EMAIL = 'sairamchinta@gmail.com';
 
 const DOMAIN_NAME = 'eudresscode.tadpoleindustries.com';
 const HOSTED_ZONE_ID = 'Z0650233B5QZHL1QIP47';
@@ -170,6 +176,89 @@ export class EuDressCodeStack extends cdk.Stack {
       recordName: 'eudresscode',
       target: route53.RecordTarget.fromAlias(new route53Targets.CloudFrontTarget(distribution)),
     });
+
+    // ── Monitoring ────────────────────────────────────────────────────────────
+
+    // SNS topic for all alerts
+    const alertTopic = new sns.Topic(this, 'AlertTopic', {
+      topicName: 'eu-dress-code-alerts',
+      displayName: 'Dress Perfectly Alerts',
+    });
+    alertTopic.addSubscription(new snsSubscriptions.EmailSubscription(ALERT_EMAIL));
+
+    const snsAction = new cloudwatchActions.SnsAction(alertTopic);
+
+    // Helper: create standard Lambda alarms for a function
+    const lambdaAlarms = (fn: lambda.IFunction, name: string) => {
+      // Errors > 0 in any 1-minute window
+      fn.metricErrors({ period: cdk.Duration.minutes(1) })
+        .createAlarm(this, `${name}Errors`, {
+          alarmName: `${fn.functionName}-errors`,
+          alarmDescription: `${name} threw errors`,
+          threshold: 1,
+          evaluationPeriods: 1,
+          comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+        })
+        .addAlarmAction(snsAction);
+
+      // Throttles > 0 in any 1-minute window
+      fn.metricThrottles({ period: cdk.Duration.minutes(1) })
+        .createAlarm(this, `${name}Throttles`, {
+          alarmName: `${fn.functionName}-throttles`,
+          alarmDescription: `${name} is being throttled`,
+          threshold: 1,
+          evaluationPeriods: 1,
+          comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+        })
+        .addAlarmAction(snsAction);
+
+      // P99 duration > 20 s (timeout is 28 s — warn with 8 s headroom)
+      fn.metricDuration({ period: cdk.Duration.minutes(5), statistic: 'p99' })
+        .createAlarm(this, `${name}HighLatency`, {
+          alarmName: `${fn.functionName}-high-latency`,
+          alarmDescription: `${name} p99 latency > 20 s`,
+          threshold: 20_000,
+          evaluationPeriods: 2,
+          comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+        })
+        .addAlarmAction(snsAction);
+    };
+
+    lambdaAlarms(searchFn, 'Search');
+    lambdaAlarms(analyzeClosetFn, 'AnalyzeCloset');
+
+    // Route 53 health check — HTTPS GET on the site root
+    const healthCheck = new route53.CfnHealthCheck(this, 'SiteHealthCheck', {
+      healthCheckConfig: {
+        type: 'HTTPS',
+        fullyQualifiedDomainName: DOMAIN_NAME,
+        port: 443,
+        resourcePath: '/',
+        requestInterval: 30,
+        failureThreshold: 3,
+      },
+      healthCheckTags: [{ key: 'Name', value: 'eu-dress-code-site' }],
+    });
+
+    // Route 53 health check metrics are only available in us-east-1
+    new cloudwatch.Alarm(this, 'SiteUptimeAlarm', {
+      alarmName: 'eu-dress-code-site-down',
+      alarmDescription: `${DOMAIN_NAME} failed health check 3 times in a row`,
+      metric: new cloudwatch.Metric({
+        namespace: 'AWS/Route53',
+        metricName: 'HealthCheckStatus',
+        dimensionsMap: { HealthCheckId: healthCheck.ref },
+        period: cdk.Duration.minutes(1),
+        statistic: 'Minimum',
+      }),
+      threshold: 1,
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+    }).addAlarmAction(snsAction);
 
     // ── Outputs (used by deploy.ps1) ──────────────────────────────────────────
     new cdk.CfnOutput(this, 'BucketName', {
