@@ -39,6 +39,17 @@ export interface ClosetResult {
   suitableFor?: Array<{ id: string; name: string }>;
 }
 
+export interface OutfitDetails {
+  jacket?: string;
+  top?: string;
+  bottom?: string;
+  accessories?: string[];
+  shoeType?: string;
+  shoeColour?: string;
+  dos?: string[];
+  donts?: string[];
+}
+
 export interface AiRecommendation {
   name: string;
   description: string;
@@ -47,6 +58,8 @@ export interface AiRecommendation {
   formalityLabel: string;
   menOutfit: string;
   womenOutfit: string;
+  menDetails?: OutfitDetails;
+  womenDetails?: OutfitDetails;
   menPhoto?: string;
   womenPhoto?: string;
   menPhotoSearch?: string;

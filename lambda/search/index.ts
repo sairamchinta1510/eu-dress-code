@@ -77,7 +77,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const safeQuery = query.replace(/"""/g, "'''");
-    const prompt = `You are a European dress code expert. Given the user query, do two things:
+    const prompt = `You are a dress code expert. Given the user query, do two things:
 
 1. From the list below, find dress codes with relevance >= 2 (sorted by descending relevance).
 2. If the query does NOT match any existing dress code (empty results), create a CUSTOM AI recommendation.
@@ -100,8 +100,28 @@ If results is empty, replace null with:
   "occasions": ["string"],
   "formality": number_1_to_5,
   "formalityLabel": "string",
-  "menOutfit": "concise men outfit description",
-  "womenOutfit": "concise women outfit description",
+  "menOutfit": "brief one-line summary of men outfit",
+  "womenOutfit": "brief one-line summary of women outfit",
+  "menDetails": {
+    "jacket": "jacket or outerwear description (empty string if not applicable)",
+    "top": "top or shirt description",
+    "bottom": "trousers, skirt, or lower garment",
+    "accessories": ["accessory 1", "accessory 2"],
+    "shoeType": "shoe style description",
+    "shoeColour": "shoe colour",
+    "dos": ["do tip 1", "do tip 2", "do tip 3"],
+    "donts": ["dont tip 1", "dont tip 2", "dont tip 3"]
+  },
+  "womenDetails": {
+    "jacket": "jacket or outerwear description (empty string if not applicable)",
+    "top": "top or blouse description",
+    "bottom": "skirt, trousers, or dress description",
+    "accessories": ["accessory 1", "accessory 2"],
+    "shoeType": "shoe style description",
+    "shoeColour": "shoe colour",
+    "dos": ["do tip 1", "do tip 2", "do tip 3"],
+    "donts": ["dont tip 1", "dont tip 2", "dont tip 3"]
+  },
   "menPhotoSearch": "2-4 word Pexels photo search term for men (e.g. sherwani groom)",
   "womenPhotoSearch": "2-4 word Pexels photo search term for women (e.g. lehenga bride)"
 }`;
