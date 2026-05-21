@@ -29,3 +29,7 @@ cdk-outputs.json
 infra/cdk.out/
 infra/node_modules/
 test-payload.json
+
+# Build artefacts
+lambda-dist/
+infra/dist/
