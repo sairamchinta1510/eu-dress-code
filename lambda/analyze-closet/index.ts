@@ -32,9 +32,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     const apiKey = await getGeminiApiKey();
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
-    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     const mimeType = imageBase64.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
 
     const dressCodeList = Object.entries(DRESS_CODE_NAMES)

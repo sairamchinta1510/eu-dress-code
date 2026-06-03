@@ -74,9 +74,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     const [apiKey, pexelsKey] = await Promise.all([getGeminiApiKey(), getPexelsApiKey()]);
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
-    const safeQuery = query.replace(/"""/g, "'''");
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); = query.replace(/"""/g, "'''");
     const prompt = `You are a dress code expert. Given the user query, do two things:
 
 1. From the list below, find dress codes with relevance >= 2 (sorted by descending relevance).
