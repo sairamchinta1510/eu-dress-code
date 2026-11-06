@@ -1005,7 +1005,7 @@ npx vercel login          # opens browser for auth
 npx vercel --prod         # deploys api/ folder; note the URL shown
 ```
 In the Vercel dashboard → Project Settings → Environment Variables, add:
-- `GEMINI_API_KEY` = `REDACTED`
+- `GEMINI_API_KEY` = `<your-gemini-api-key>`
 - `ALLOWED_ORIGIN` = `https://tadpoleindustries.com`
 
 **2. Update `.env.production` with the real Vercel URL**, then rebuild:
